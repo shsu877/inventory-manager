@@ -27,6 +27,7 @@ interface Sale {
   quantity: number;
   dateTime: string;
   channel: string;
+  salePrice: number;
 }
 
 export type {

@@ -78,6 +78,7 @@ export default function InventoryAdjustmentDialog({
         const saleData = {
           productId,
           quantity: quantitySold,
+          salePrice: product.price,
           totalAmount: quantitySold * product.price,
           channel: 'manual', // Default channel for manual adjustments
         };

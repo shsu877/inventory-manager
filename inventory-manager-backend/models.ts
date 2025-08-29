@@ -20,6 +20,7 @@ export interface IInventory {
 export interface ISale {
   productId: mongoose.Types.ObjectId;
   quantity: number;
+  salePrice: number;
   totalAmount: number;
   channel: string;
   channelOrderId?: string;
@@ -54,6 +55,7 @@ const inventorySchema = new Schema<IInventory>({
 const salesSchema = new Schema<ISale>({
   productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
   quantity: { type: Number, required: true },
+  salePrice: { type: Number, required: true },
   totalAmount: { type: Number, required: true },
   channel: { type: String, required: true },
   channelOrderId: String,

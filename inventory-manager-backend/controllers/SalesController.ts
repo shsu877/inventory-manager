@@ -4,6 +4,7 @@ import { Product, Inventory, Sale } from '../models';
 type SaleBody = {
   productId: string;
   quantity: number;
+  salePrice: number;
   totalAmount: number;
   channel: string;
   channelOrderId?: string;
@@ -12,7 +13,7 @@ type SaleBody = {
 // Create a new sale
 export const createSale = async (req: Request<{}, {}, SaleBody>, res: Response) => {
   try {
-    const { productId, quantity, totalAmount, channel, channelOrderId } = req.body;
+    const { productId, quantity, salePrice, totalAmount, channel, channelOrderId } = req.body;
 
     // Check if sufficient inventory is available
     const inventory = await Inventory.findOne({ productId });
@@ -24,6 +25,7 @@ export const createSale = async (req: Request<{}, {}, SaleBody>, res: Response) 
     const sale = new Sale({
       productId,
       quantity,
+      salePrice,
       totalAmount,
       channel,
       channelOrderId

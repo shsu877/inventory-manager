@@ -69,6 +69,7 @@ export const SalesService = {
   createSale: async (sale: {
     productId: string;
     quantity: number;
+    salePrice: number;
     totalAmount: number;
     channel?: string;
     channelOrderId?: string;

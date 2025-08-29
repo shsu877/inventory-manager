@@ -32,6 +32,7 @@ export default function AdjustInventoryForm({ products }: { products: Product[] 
           quantity: quantitySold,
           totalAmount: quantitySold * data.product.price,
           channel: "manual", // Default channel for manual adjustments
+          salePrice: data.product.price
         };
         await SalesService.createSale(saleData);
       }
