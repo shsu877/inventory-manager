@@ -21,6 +21,7 @@ interface RowData {
   price: number;
   productId: string;
   handleAdjust: (rowId: string) => void;
+  handleDelete: (productId: string) => void;
 }
 
 const columns: GridColDef[] = [
@@ -59,15 +60,25 @@ const columns: GridColDef[] = [
   {
     field: "actions",
     headerName: "Actions",
-    width: 150,
+    width: 250,
     renderCell: ({ row }) => (
-      <Button
-        size="small"
-        variant="outlined"
-        onClick={() => row.handleAdjust(row.id)}
-      >
-        Adjust
-      </Button>
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <Button
+          size="small"
+          variant="outlined"
+          color="error"
+          onClick={() => row.handleDelete(row.productId)}
+        >
+          Delete
+        </Button>
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={() => row.handleAdjust(row.id)}
+        >
+          Adjust
+        </Button>
+      </Box>
     ),
   },
 ];
@@ -103,6 +114,13 @@ const CombinedInventoryTable = ({
     }
   };
 
+  // Handle button click for deletion
+  const handleDeleteClick = (productId: string) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      deleteMutation.mutate(productId);
+    }
+  };
+
   // Store the original rows data for retrieving current stock values
   const rowDataRef = useRef<RowData[]>([]);
   const rowsRef = useRef<RowData[]>([]);
@@ -123,6 +141,7 @@ const CombinedInventoryTable = ({
       stock: inventoryItem?.quantityOnHand || 0,
       itemsSold: itemsSold,
       handleAdjust: handleAdjustClick,
+      handleDelete: handleDeleteClick,
     };
 
     return rowData;
@@ -150,6 +169,20 @@ const CombinedInventoryTable = ({
     },
     onError: (error) => {
       console.error("Failed to adjust inventory:", error);
+    },
+  });
+
+  // Mutation for deleting a product
+  const deleteMutation = useMutation({
+    mutationFn: (productId: string) => ProductService.deleteProduct(productId),
+    onSuccess: () => {
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+    onError: (error) => {
+      console.error("Failed to delete product:", error);
     },
   });
 

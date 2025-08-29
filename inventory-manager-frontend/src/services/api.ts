@@ -54,6 +54,10 @@ export const ProductService = {
   updateVariant: async (productId: string, variantData: any): Promise<any> => {
     const response = await API.put(`/products/${productId}/variants`, variantData);
     return response.data;
+  },
+
+  deleteProduct: async (productId: string): Promise<void> => {
+    await API.delete(`/products/${productId}`);
   }
 };
 
