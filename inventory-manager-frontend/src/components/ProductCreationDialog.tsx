@@ -208,12 +208,15 @@ const ProductCreationDialog: React.FC<ProductCreationDialogProps> = ({
             <TextField
               label="Price"
               type="number"
-              value={formData.price}
-              onChange={(e) => handleFieldChange('price', parseFloat(e.target.value) || 0)}
+              value={formData.price || ''}
+              onChange={(e) => {
+                const value = e.target.value;
+                const parsedValue = parseFloat(value);
+                handleFieldChange('price', isNaN(parsedValue) || value === '' ? 0 : parsedValue);
+              }}
               error={!!errors.price}
               helperText={errors.price}
               required
-              inputProps={{ min: 0, step: 0.01 }}
               fullWidth
             />
           </Box>
@@ -221,11 +224,14 @@ const ProductCreationDialog: React.FC<ProductCreationDialogProps> = ({
           <TextField
             label="Starting Inventory"
             type="number"
-            value={formData.startingStock}
-            onChange={(e) => handleFieldChange('startingStock', parseInt(e.target.value) || 0)}
+            value={formData.startingStock || ''}
+            onChange={(e) => {
+              const value = e.target.value;
+              const parsedValue = parseInt(value);
+              handleFieldChange('startingStock', isNaN(parsedValue) || value === '' ? 0 : parsedValue);
+            }}
             error={!!errors.startingStock}
             helperText={errors.startingStock}
-            inputProps={{ min: 0 }}
             fullWidth
           />
         </Box>
