@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { InventoryService } from '../services/api';
+import { InventoryService, SalesService, ProductService } from '../services/api';
 import { Product } from '../types';
 import { Button, TextField, Box, FormControl, InputLabel, Select, MenuItem, Typography } from '@mui/material';
 
 interface AdjustmentData {
   productId: string;
   adjustment: number;
+  product: Product;
 }
 
 export default function AdjustInventoryForm({ products }: { products: Product[] }) {
@@ -16,10 +17,29 @@ export default function AdjustInventoryForm({ products }: { products: Product[] 
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (data: AdjustmentData) => 
-      InventoryService.adjustInventory(data),
+    mutationFn: async (data: AdjustmentData & { product: Product }) => {
+      // Adjust inventory first
+      await InventoryService.adjustInventory({
+        productId: data.productId,
+        adjustment: data.adjustment
+      });
+
+      // If adjustment is negative (items were sold), create a sale record
+      if (data.adjustment < 0) {
+        const quantitySold = Math.abs(data.adjustment);
+        const saleData = {
+          productId: data.productId,
+          quantity: quantitySold,
+          totalAmount: quantitySold * data.product.price,
+          channel: "manual", // Default channel for manual adjustments
+        };
+        await SalesService.createSale(saleData);
+      }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      queryClient.invalidateQueries({ queryKey: ["inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
       setSelectedProduct(null);
       setAdjustment(0);
     },
@@ -31,13 +51,14 @@ export default function AdjustInventoryForm({ products }: { products: Product[] 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedProduct) {
-      setError('Please select a product and variant');
+      setError('Please select a product');
       return;
     }
-    
+
     mutation.mutate({
       productId: selectedProduct._id,
-      adjustment
+      adjustment,
+      product: selectedProduct
     });
   };
 

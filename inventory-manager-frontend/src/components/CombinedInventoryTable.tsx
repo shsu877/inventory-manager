@@ -128,7 +128,7 @@ const CombinedInventoryTable = ({
   // Create rows from products directly (one row per product)
   const rows: RowData[] = products.map((product) => {
     const inventoryItem = inventory.find(
-      (item) => item.productId === product._id
+      (item) => item.productId.toString() === product._id.toString()
     );
     const itemsSold = salesByProduct[product._id] || 0;
 

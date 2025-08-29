@@ -8,7 +8,7 @@ type AdjustmentBody = { productId: string; adjustment: number; };
 // Get all inventory records
 export const getInventory = async (req: Request, res: Response) => {
   try {
-    const inventory = await Inventory.find().populate('productId');
+    const inventory = await Inventory.find();
     res.json(inventory);
   } catch (err: any) {
     res.status(500).json({ message: err.message });

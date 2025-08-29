@@ -12,7 +12,6 @@ interface Product {
 interface InventoryItem {
   productId: string;
   quantityOnHand: number;
-  product?: Product;
   lastSold?: string;
 }
 
