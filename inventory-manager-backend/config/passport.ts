@@ -1,6 +1,9 @@
-const JwtStrategy = require('passport-jwt').Strategy;
-const ExtractJwt = require('passport-jwt').ExtractJwt;
-const User = require('../models/User');
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+import { User } from '../models';
+
+interface JwtPayload {
+  userId: string;
+}
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
@@ -9,9 +12,9 @@ const opts = {
   secretOrKey: JWT_SECRET
 };
 
-module.exports = (passport) => {
+export default (passport: any) => {
   passport.use(
-    new JwtStrategy(opts, async (payload, done) => {
+    new JwtStrategy(opts, async (payload: JwtPayload, done) => {
       try {
         const user = await User.findById(payload.userId);
         if (!user) {

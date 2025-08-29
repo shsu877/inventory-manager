@@ -1,11 +1,11 @@
-const fs = require('fs');
-const { google } = require('googleapis');
+import fs from 'fs';
+import { google } from 'googleapis';
 
 // Load Google Drive API credentials
-const CREDENTIALS = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+const CREDENTIALS = JSON.parse(process.env.GOOGLE_CREDENTIALS || '{}');
 
 // Configure auth client
-const auth = new google.auth.GoogleAuth({
+const auth = new google.Auth.GoogleAuth({
   credentials: CREDENTIALS,
   scopes: ['https://www.googleapis.com/auth/drive.file']
 });
@@ -14,7 +14,7 @@ const auth = new google.auth.GoogleAuth({
 const drive = google.drive({ version: 'v3', auth });
 
 // Upload a file to Google Drive
-exports.uploadFile = async (filePath, fileName) => {
+export const uploadFile = async (filePath: string, fileName: string): Promise<void> => {
   try {
     const fileMetadata = {
       name: fileName,
@@ -27,7 +27,7 @@ exports.uploadFile = async (filePath, fileName) => {
       requestBody: fileMetadata,
       media: media,
       fields: 'id'
-    });
+    } as any);
     console.log(`File uploaded to Google Drive: ${response.data.id}`);
   } catch (err) {
     console.error('Error uploading file to Google Drive:', err);

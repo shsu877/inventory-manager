@@ -1,7 +1,16 @@
-const { Product, Inventory, Sale } = require('../models');
+import { Request, Response } from 'express';
+import { Product, Inventory, Sale } from '../models';
+
+type SaleBody = {
+  productId: string;
+  quantity: number;
+  totalAmount: number;
+  channel: string;
+  channelOrderId?: string;
+};
 
 // Create a new sale
-exports.createSale = async (req, res) => {
+export const createSale = async (req: Request<{}, {}, SaleBody>, res: Response) => {
   try {
     const { productId, quantity, totalAmount, channel, channelOrderId } = req.body;
 
@@ -26,17 +35,17 @@ exports.createSale = async (req, res) => {
     await inventory.save();
 
     res.status(201).json(newSale);
-  } catch (err) {
+  } catch (err: any) {
     res.status(400).json({ message: err.message });
   }
 };
 
 // Get all sales
-exports.getSales = async (req, res) => {
+export const getSales = async (req: Request, res: Response) => {
   try {
     const sales = await Sale.find().populate('productId');
     res.json(sales);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ message: err.message });
   }
 };

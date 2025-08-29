@@ -1,17 +1,22 @@
-const { Inventory } = require('../models');
+import { Request, Response } from 'express';
+import { Inventory } from '../models';
+
+type GetInventoryParams = { productId?: string };
+type InventoryCreateBody = { productId: string; quantityOnHand: number; };
+type AdjustmentBody = { productId: string; adjustment: number; };
 
 // Get all inventory records
-exports.getInventory = async (req, res) => {
+export const getInventory = async (req: Request, res: Response) => {
   try {
     const inventory = await Inventory.find().populate('productId');
     res.json(inventory);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ message: err.message });
   }
 };
 
 // Get inventory record for a product
-exports.getInventoryByProduct = async (req, res) => {
+export const getInventoryByProduct = async (req: Request<GetInventoryParams>, res: Response) => {
   try {
     const inventory = await Inventory.findOne({
       productId: req.params.productId,
@@ -20,13 +25,13 @@ exports.getInventoryByProduct = async (req, res) => {
       return res.status(404).json({ message: 'Inventory record not found' });
     }
     res.json(inventory);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ message: err.message });
   }
 };
 
 // Create or update inventory record
-exports.upsertInventory = async (req, res) => {
+export const upsertInventory = async (req: Request<{}, {}, InventoryCreateBody>, res: Response) => {
   try {
     const { productId, quantityOnHand } = req.body;
     let inventory = await Inventory.findOne({ productId });
@@ -37,13 +42,13 @@ exports.upsertInventory = async (req, res) => {
     }
     const updatedInventory = await inventory.save();
     res.json(updatedInventory);
-  } catch (err) {
+  } catch (err: any) {
     res.status(400).json({ message: err.message });
   }
 };
 
 // Adjust inventory for a product
-exports.adjustInventory = async (req, res) => {
+export const adjustInventory = async (req: Request<{}, {}, AdjustmentBody>, res: Response) => {
   try {
     const { productId, adjustment } = req.body;
 
@@ -56,7 +61,7 @@ exports.adjustInventory = async (req, res) => {
     const updatedInventory = await inventory.save();
 
     res.json(updatedInventory);
-  } catch (err) {
+  } catch (err: any) {
     res.status(400).json({ message: err.message });
   }
 };
