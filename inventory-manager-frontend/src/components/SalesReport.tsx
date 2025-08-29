@@ -5,11 +5,11 @@ import { Sale } from '../types';
 import { Box, Typography } from '@mui/material';
 
 const columns: GridColDef<Sale>[] = [
-  { 
+  {
     field: 'productName',
     headerName: 'Product',
     flex: 1,
-    valueGetter: (params: any) => params.row.product?.name || 'N/A'
+    valueGetter: (params: any) => params.row.productId?.name || 'N/A'
   },
   { field: 'quantity', headerName: 'Qty', type: 'number' },
   { field: 'salePrice', headerName: 'Price', type: 'number' },

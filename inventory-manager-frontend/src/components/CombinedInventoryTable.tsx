@@ -102,7 +102,7 @@ const CombinedInventoryTable = ({
 
   // Calculate items sold for each product by aggregating sales data
   const salesByProduct = sales.reduce((acc, sale) => {
-    acc[sale.productId] = (acc[sale.productId] || 0) + sale.quantity;
+    acc[sale.productId.toString()] = (acc[sale.productId.toString()] || 0) + sale.quantity;
     return acc;
   }, {} as Record<string, number>);
 
@@ -139,7 +139,7 @@ const CombinedInventoryTable = ({
     const inventoryItem = inventory.find(
       (item) => item.productId.toString() === product._id.toString()
     );
-    const itemsSold = salesByProduct[product._id] || 0;
+    const itemsSold = salesByProduct[product._id.toString()] || 0;
 
     const rowData: RowData = {
       id: product._id,
@@ -215,11 +215,11 @@ const CombinedInventoryTable = ({
 
       // If adjustment is negative (items were sold), create a sale record
       if (adjustment < 0) {
-        const product = products.find((p) => p._id === newRow.productId);
+        const product = products.find((p) => p._id === newRow.productId._id);
         if (product) {
           const quantitySold = Math.abs(adjustment);
           const saleData = {
-            productId: newRow.productId,
+            productId: newRow.productId._id.toString(),
             quantity: quantitySold,
             totalAmount: quantitySold * product.price,
             channel: "manual", // Default channel for manual adjustments

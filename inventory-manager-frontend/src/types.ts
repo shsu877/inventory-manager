@@ -28,7 +28,6 @@ interface Sale {
   salePrice: number;
   saleDate: string;
   channel: string;
-  product?: Product;
 }
 
 export type {

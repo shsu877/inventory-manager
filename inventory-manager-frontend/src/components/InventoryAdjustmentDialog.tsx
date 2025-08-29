@@ -40,7 +40,7 @@ export default function InventoryAdjustmentDialog({
 
   // Calculate current items sold
   const itemsSold = sales
-    .filter(sale => sale.productId === productId)
+    .filter(sale => sale.productId === productId) // todo do we need the whole product here?
     .reduce((total, sale) => total + sale.quantity, 0);
 
   const mutation = useMutation({

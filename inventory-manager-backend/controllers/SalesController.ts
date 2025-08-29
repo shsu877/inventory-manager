@@ -43,7 +43,7 @@ export const createSale = async (req: Request<{}, {}, SaleBody>, res: Response) 
 // Get all sales
 export const getSales = async (req: Request, res: Response) => {
   try {
-    const sales = await Sale.find().populate('productId');
+    const sales = await Sale.find();
     res.json(sales);
   } catch (err: any) {
     res.status(500).json({ message: err.message });
