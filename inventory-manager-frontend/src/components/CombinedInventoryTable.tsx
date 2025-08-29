@@ -15,7 +15,7 @@ import ProductCreationDialog from "./ProductCreationDialog";
 interface RowData {
   id: string;
   productName: string;
-  category: string;
+  tags: string;
   stock: number;
   itemsSold: number;
   price: number;
@@ -31,9 +31,10 @@ const columns: GridColDef[] = [
     editable: true,
   },
   {
-    field: "category",
-    headerName: "Category",
-    width: 150,
+    field: "tags",
+    headerName: "Tags",
+    width: 200,
+    renderCell: (params) => params.value || "No tags",
   },
   {
     field: "price",
@@ -117,7 +118,7 @@ const CombinedInventoryTable = ({
       id: product._id,
       productId: product._id,
       productName: product.name,
-      category: product.category,
+      tags: product.tags?.join(', ') || '',
       price: product.price,
       stock: inventoryItem?.quantityOnHand || 0,
       itemsSold: itemsSold,

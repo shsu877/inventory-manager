@@ -36,6 +36,11 @@ export const ProductService = {
     return response.data;
   },
 
+  getTags: async (): Promise<string[]> => {
+    const response = await API.get('/tags');
+    return response.data;
+  },
+
   createProduct: async (productData: any): Promise<any> => {
     const response = await API.post('/products', productData);
     return response.data;

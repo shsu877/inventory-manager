@@ -3,7 +3,8 @@ interface Product {
   _id: string;
   name: string;
   description: string;
-  category: string;
+  category?: string;
+  tags: string[];
   price: number;
   isDeprecated: boolean;
 }

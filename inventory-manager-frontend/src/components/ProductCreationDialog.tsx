@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -8,14 +8,16 @@ import {
   Button,
   Box,
   Typography,
+  Autocomplete,
+  Chip,
 } from '@mui/material';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ProductService, InventoryService } from '../services/api';
 
 interface ProductFormData {
   name: string;
   description: string;
-  category: string;
+  tags: string[];
   price: number;
   startingStock: number;
 }
@@ -32,12 +34,18 @@ const ProductCreationDialog: React.FC<ProductCreationDialogProps> = ({
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
     description: '',
-    category: '',
+    tags: [],
     price: 0,
     startingStock: 0,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const queryClient = useQueryClient();
+
+  // Query for available tags
+  const { data: availableTags = [] } = useQuery({
+    queryKey: ['tags'],
+    queryFn: ProductService.getTags,
+  });
 
   const createProductMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
@@ -45,7 +53,7 @@ const ProductCreationDialog: React.FC<ProductCreationDialogProps> = ({
       const productData = {
         name: data.name,
         description: data.description,
-        category: data.category,
+        tags: data.tags,
         price: data.price,
       };
 
@@ -77,7 +85,7 @@ const ProductCreationDialog: React.FC<ProductCreationDialogProps> = ({
     setFormData({
       name: '',
       description: '',
-      category: '',
+      tags: [],
       price: 0,
       startingStock: 0,
     });
@@ -85,7 +93,7 @@ const ProductCreationDialog: React.FC<ProductCreationDialogProps> = ({
     onClose();
   };
 
-  const handleFieldChange = (field: string, value: string | number) => {
+  const handleFieldChange = (field: string, value: string | number | string[]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
@@ -103,9 +111,6 @@ const ProductCreationDialog: React.FC<ProductCreationDialogProps> = ({
     }
     if (!formData.description.trim()) {
       newErrors.description = 'Description is required';
-    }
-    if (!formData.category.trim()) {
-      newErrors.category = 'Category is required';
     }
     if (formData.price <= 0) {
       newErrors.price = 'Price must be greater than 0';
@@ -170,13 +175,33 @@ const ProductCreationDialog: React.FC<ProductCreationDialogProps> = ({
           />
 
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-            <TextField
-              label="Category"
-              value={formData.category}
-              onChange={(e) => handleFieldChange('category', e.target.value)}
-              error={!!errors.category}
-              helperText={errors.category}
-              required
+            <Autocomplete
+              multiple
+              freeSolo
+              options={availableTags}
+              value={formData.tags}
+              onChange={(event, newValue) => {
+                handleFieldChange('tags', newValue);
+              }}
+              renderTags={(value: readonly string[], getTagProps) =>
+                value.map((option: string, index: number) => (
+                  <Chip
+                    variant="outlined"
+                    label={option}
+                    {...getTagProps({ index })}
+                    key={option}
+                  />
+                ))
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Tags"
+                  error={!!errors.tags}
+                  helperText={errors.tags}
+                  placeholder="Select or add tags"
+                />
+              )}
               fullWidth
             />
 

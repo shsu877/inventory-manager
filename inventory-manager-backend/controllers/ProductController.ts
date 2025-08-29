@@ -5,8 +5,8 @@ type ProductParams = { id: string };
 type ProductBody = {
   name: string;
   description: string;
-  category: string;
-  tags: string[];
+  category?: string;
+  tags?: string[];
   price: number;
   isDeprecated?: boolean;
 };
@@ -69,6 +69,17 @@ export const deleteProduct = async (req: Request<ProductParams>, res: Response) 
     }
     await product.deleteOne();
     res.json({ message: 'Product deleted' });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Get all unique tags
+export const getAllTags = async (req: Request, res: Response) => {
+  try {
+    const tags = await Product.distinct('tags');
+    const uniqueTags = [...new Set(tags.flat())].sort();
+    res.json(uniqueTags);
   } catch (err: any) {
     res.status(500).json({ message: err.message });
   }
