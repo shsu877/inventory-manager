@@ -23,10 +23,9 @@ interface InventoryAdjustment {
 
 interface Sale {
   _id: string;
-  productId: string;
+  productId: string; // populated object after populate()
   quantity: number;
-  salePrice: number;
-  saleDate: string;
+  dateTime: string;
   channel: string;
 }
 

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useInventory, useProducts, useSales } from './hooks';
 import CombinedInventoryTable from './components/CombinedInventoryTable';
 import SalesReport from './components/SalesReport';
-import AdjustInventoryForm from './components/AdjustInventoryForm';
 import { CircularProgress, Alert, Box, Tabs, Tab, Paper } from '@mui/material';
 import LoginButton from './components/LoginButton';
 
@@ -80,15 +79,12 @@ function App() {
           sales={sales || []}
         />
       )}
-      
-      {activeTab === 2 && (
+
+      {activeTab === 1 && (
+        salesLoading ? <CircularProgress /> :
         <SalesReport />
       )}
       
-      {activeTab === 3 && (
-        productsLoading ? <CircularProgress /> :
-        <AdjustInventoryForm products={products || []} />
-      )}
     </div>
   );
 }

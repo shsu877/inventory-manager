@@ -1,4 +1,4 @@
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridValueGetter } from '@mui/x-data-grid';
 import { useQuery } from '@tanstack/react-query';
 import { SalesService } from '../services/api';
 import { Sale } from '../types';
@@ -9,15 +9,14 @@ const columns: GridColDef<Sale>[] = [
     field: 'productName',
     headerName: 'Product',
     flex: 1,
-    valueGetter: (params: any) => params.row.productId?.name || 'N/A'
+    valueGetter: (params: { row: Sale }) => params.row.productId || 'N/A'
   },
   { field: 'quantity', headerName: 'Qty', type: 'number' },
-  { field: 'salePrice', headerName: 'Price', type: 'number' },
   { 
     field: 'saleDate', 
     headerName: 'Date', 
     type: 'date',
-    valueGetter: (params: any) => new Date(params.row.saleDate)
+    valueGetter: (params: { row: Sale }) => new Date(params.row.dateTime)
   },
   { field: 'channel', headerName: 'Channel' }
 ];
@@ -27,7 +26,7 @@ export default function SalesReport() {
     queryKey: ['sales'],
     queryFn: () => SalesService.getSales()
   });
-
+console.log('Sales data:', data);
   return (
     <Box sx={{ height: 600, width: '100%', p: 2 }}>
       <Typography variant="h5" sx={{ mb: 2 }}>Sales Report</Typography>
