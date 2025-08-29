@@ -7,7 +7,7 @@ import {
   ProductService,
 } from "../services/api";
 import { InventoryItem, Product, Sale } from "../types";
-import { Button, Box } from "@mui/material";
+import { Button, Box, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
 import InventoryAdjustmentDialog from "./InventoryAdjustmentDialog";
 import ProductCreationDialog from "./ProductCreationDialog";
@@ -97,6 +97,7 @@ const CombinedInventoryTable = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<string>("");
   const queryClient = useQueryClient();
 
   // Calculate items sold for each product by aggregating sales data
@@ -104,6 +105,14 @@ const CombinedInventoryTable = ({
     acc[sale.productId] = (acc[sale.productId] || 0) + sale.quantity;
     return acc;
   }, {} as Record<string, number>);
+
+  // Get available tags from products
+  const availableTags = [...new Set(products.flatMap(product => product.tags || []))].sort();
+
+  // Filter products based on selected tag
+  const filteredProducts = selectedTag
+    ? products.filter(product => product.tags?.includes(selectedTag))
+    : products;
 
   // Handle button click for adjustments
   const handleAdjustClick = (rowId: string) => {
@@ -125,8 +134,8 @@ const CombinedInventoryTable = ({
   const rowDataRef = useRef<RowData[]>([]);
   const rowsRef = useRef<RowData[]>([]);
 
-  // Create rows from products directly (one row per product)
-  const rows: RowData[] = products.map((product) => {
+  // Create rows from filtered products (one row per product)
+  const rows: RowData[] = filteredProducts.map((product) => {
     const inventoryItem = inventory.find(
       (item) => item.productId.toString() === product._id.toString()
     );
@@ -245,7 +254,25 @@ const CombinedInventoryTable = ({
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
+        <FormControl sx={{ minWidth: 200 }}>
+          <InputLabel>Filter by Tag</InputLabel>
+          <Select
+            value={selectedTag}
+            label="Filter by Tag"
+            onChange={(e) => setSelectedTag(e.target.value)}
+          >
+            <MenuItem value="">
+              <em>All Products</em>
+            </MenuItem>
+            {availableTags.map((tag) => (
+              <MenuItem key={tag} value={tag}>
+                {tag}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
         <Button
           variant="contained"
           startIcon={<AddIcon />}
