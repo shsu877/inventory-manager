@@ -53,7 +53,7 @@ app.delete('/api/products/:id', ProductController.deleteProduct);
 
 // Inventory routes
 app.get('/api/inventory', InventoryController.getInventory);
-app.get('/api/inventory/:productId/:variantId', InventoryController.getInventoryByVariant);
+app.get('/api/inventory/:productId', InventoryController.getInventoryByProduct);
 app.post('/api/inventory', InventoryController.upsertInventory);
 app.put('/api/inventory', InventoryController.adjustInventory);
 

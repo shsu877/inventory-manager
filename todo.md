@@ -9,7 +9,7 @@ This is a smaller business without warehouses, and that sales are typically for 
 
 Login with Etsy OAuth.
 
-One tab should be called "inventory management". With columns Product name, variant, stock, and number of items sold manually, and number of items sold through etsy, and total items sold.
+One tab should be called "inventory management". With columns Product name, stock, and number of items sold manually, and number of items sold through etsy, and total items sold.
 
 The rows of the Inventory Managment tab should be inputs that can be edited by typing in them.
 Each row should have a button to open a dialog for inventory adjustment. Where I enter the amount the inventory has been changed, and it should update amount of items sold manually based on that number.

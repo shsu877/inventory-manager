@@ -11,11 +11,6 @@ const columns: GridColDef<Sale>[] = [
     flex: 1,
     valueGetter: (params: any) => params.row.product?.name || 'N/A'
   },
-  {
-    field: 'variantColor',
-    headerName: 'Variant',
-    valueGetter: (params: any) => params.row.product?.variants.find((v: any) => v.id === params.row.variantId)?.color || 'N/A'
-  },
   { field: 'quantity', headerName: 'Qty', type: 'number' },
   { field: 'salePrice', headerName: 'Price', type: 'number' },
   { 
@@ -45,7 +40,7 @@ export default function SalesReport() {
         rows={data || []}
         columns={columns}
         loading={isLoading}
-        getRowId={(row) => row.id}
+        getRowId={(row) => row._id}
         disableRowSelectionOnClick
       />
     </Box>

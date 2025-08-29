@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { InventoryItem, Sale } from '../types';
+import { InventoryItem, Product, Sale } from '../types';
 
 const API = axios.create({
   baseURL: 'http://localhost:3000/api',
@@ -16,17 +16,28 @@ export const InventoryService = {
   },
   adjustInventory: async (adjustment: {
     productId: string;
-    variantId: string;
     adjustment: number;
   }): Promise<InventoryItem> => {
     const response = await API.put('/inventory', adjustment);
+    return response.data;
+  },
+  upsertInventory: async (inventory: {
+    productId: string;
+    quantityOnHand: number;
+  }): Promise<InventoryItem> => {
+    const response = await API.post('/inventory', inventory);
     return response.data;
   }
 };
 
 export const ProductService = {
-  getProducts: async (): Promise<any[]> => {
+  getProducts: async (): Promise<Product[]> => {
     const response = await API.get('/products');
+    return response.data;
+  },
+
+  createProduct: async (productData: any): Promise<any> => {
+    const response = await API.post('/products', productData);
     return response.data;
   },
 
@@ -48,7 +59,6 @@ export const SalesService = {
   },
   createSale: async (sale: {
     productId: string;
-    variantId: string;
     quantity: number;
     totalAmount: number;
     channel?: string;

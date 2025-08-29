@@ -10,12 +10,6 @@ const columns: GridColDef<InventoryItem>[] = [
     valueGetter: (params: any) => params.row.product?.name || 'N/A'
   },
   {
-    field: 'variantColor',
-    headerName: 'Variant',
-    width: 120,
-    valueGetter: (params: any) => params.row.product?.variants.find((v: any) => v.id === params.row.variantId)?.color || 'N/A'
-  },
-  {
     field: 'quantityOnHand',
     headerName: 'Stock',
     type: 'number',
@@ -44,7 +38,7 @@ const InventoryTable = ({ inventory, loading }: InventoryTableProps) => {
         columns={columns}
         loading={loading}
         disableRowSelectionOnClick
-        getRowId={(row) => `${row.productId}-${row.variantId}`}
+        getRowId={(row) => `${row.productId}`}
       />
     </div>
   );

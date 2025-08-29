@@ -7,11 +7,7 @@ const productSchema = new mongoose.Schema({
   category: { type: String, required: true },
   tags: [String],
   price: { type: Number, required: true },
-  isDeprecated: { type: Boolean, default: false },
-  variants: [{
-    id: { type: String, required: true },
-    name: { type: String, required: true }
-  }]
+  isDeprecated: { type: Boolean, default: false }
 });
 
 const Product = mongoose.model('Product', productSchema);
@@ -19,7 +15,6 @@ const Product = mongoose.model('Product', productSchema);
 // Inventory Schema 
 const inventorySchema = new mongoose.Schema({
   productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
-  variantId: { type: String, required: true },
   quantityOnHand: { type: Number, required: true, default: 0 }
 });
 
@@ -28,7 +23,6 @@ const Inventory = mongoose.model('Inventory', inventorySchema);
 // Sales Schema
 const salesSchema = new mongoose.Schema({
   productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
-  variantId: { type: String, required: true },
   quantity: { type: Number, required: true },
   totalAmount: { type: Number, required: true },
   channel: { type: String, required: true },

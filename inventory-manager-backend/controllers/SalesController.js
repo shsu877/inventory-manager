@@ -3,10 +3,10 @@ const { Product, Inventory, Sale } = require('../models');
 // Create a new sale
 exports.createSale = async (req, res) => {
   try {
-    const { productId, variantId, quantity, totalAmount, channel, channelOrderId } = req.body;
+    const { productId, quantity, totalAmount, channel, channelOrderId } = req.body;
 
     // Check if sufficient inventory is available
-    const inventory = await Inventory.findOne({ productId, variantId });
+    const inventory = await Inventory.findOne({ productId });
     if (!inventory || inventory.quantityOnHand < quantity) {
       return res.status(400).json({ message: 'Insufficient inventory' });
     }
@@ -14,7 +14,6 @@ exports.createSale = async (req, res) => {
     // Create the sale record
     const sale = new Sale({
       productId,
-      variantId,
       quantity,
       totalAmount,
       channel,

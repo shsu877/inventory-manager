@@ -1,18 +1,16 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { InventoryService } from '../services/api';
-import { Product, ProductVariant } from '../types';
+import { Product } from '../types';
 import { Button, TextField, Box, FormControl, InputLabel, Select, MenuItem, Typography } from '@mui/material';
 
 interface AdjustmentData {
   productId: string;
-  variantId: string;
   adjustment: number;
 }
 
 export default function AdjustInventoryForm({ products }: { products: Product[] }) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [adjustment, setAdjustment] = useState<number>(0);
   const [error, setError] = useState<string>('');
   const queryClient = useQueryClient();
@@ -23,7 +21,6 @@ export default function AdjustInventoryForm({ products }: { products: Product[] 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       setSelectedProduct(null);
-      setSelectedVariant(null);
       setAdjustment(0);
     },
     onError: (err: Error) => {
@@ -33,14 +30,13 @@ export default function AdjustInventoryForm({ products }: { products: Product[] 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedProduct || !selectedVariant) {
+    if (!selectedProduct) {
       setError('Please select a product and variant');
       return;
     }
     
     mutation.mutate({
-      productId: selectedProduct.id,
-      variantId: selectedVariant.id,
+      productId: selectedProduct._id,
       adjustment
     });
   };
@@ -55,41 +51,20 @@ export default function AdjustInventoryForm({ products }: { products: Product[] 
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel>Product</InputLabel>
           <Select
-            value={selectedProduct?.id || ''}
+            value={selectedProduct?._id || ''}
             onChange={(e) => {
-              const product = products.find(p => p.id === e.target.value);
+              const product = products.find(p => p._id === e.target.value);
               setSelectedProduct(product || null);
-              setSelectedVariant(null);
             }}
             required
           >
             {products.map(product => (
-              <MenuItem key={product.id} value={product.id}>
+              <MenuItem key={product._id} value={product._id}>
                 {product.name}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
-        
-        {selectedProduct && (
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>Variant</InputLabel>
-            <Select
-              value={selectedVariant?.id || ''}
-              onChange={(e) => {
-                const variant = selectedProduct.variants.find(v => v.id === e.target.value);
-                setSelectedVariant(variant || null);
-              }}
-              required
-            >
-              {selectedProduct.variants.map(variant => (
-                <MenuItem key={variant.id} value={variant.id}>
-                  {variant.color}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
         
         <TextField
           fullWidth

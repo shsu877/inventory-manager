@@ -7,17 +7,19 @@ import {
   ProductService,
 } from "../services/api";
 import { InventoryItem, Product, Sale } from "../types";
-import { Button } from "@mui/material";
+import { Button, Box } from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
 import InventoryAdjustmentDialog from "./InventoryAdjustmentDialog";
+import ProductCreationDialog from "./ProductCreationDialog";
 
 interface RowData {
   id: string;
   productName: string;
-  variant: string;
+  category: string;
   stock: number;
   itemsSold: number;
+  price: number;
   productId: string;
-  variantId: string;
   handleAdjust: (rowId: string) => void;
 }
 
@@ -25,14 +27,20 @@ const columns: GridColDef[] = [
   {
     field: "productName",
     headerName: "Product Name",
-    flex: 1,
+    flex: 2,
     editable: true,
   },
   {
-    field: "variant",
-    headerName: "Variant",
-    width: 120,
-    editable: true,
+    field: "category",
+    headerName: "Category",
+    width: 150,
+  },
+  {
+    field: "price",
+    headerName: "Price",
+    type: "number",
+    width: 100,
+    valueFormatter: (value) => `$${value}`,
   },
   {
     field: "stock",
@@ -76,12 +84,12 @@ const CombinedInventoryTable = ({
 }: CombinedInventoryTableProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
+  const [productDialogOpen, setProductDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  // Calculate items sold for each product variant by aggregating sales data
-  const salesByVariant = sales.reduce((acc, sale) => {
-    const key = `${sale.productId}-${sale.variantId}`;
-    acc[key] = (acc[key] || 0) + sale.quantity;
+  // Calculate items sold for each product by aggregating sales data
+  const salesByProduct = sales.reduce((acc, sale) => {
+    acc[sale.productId] = (acc[sale.productId] || 0) + sale.quantity;
     return acc;
   }, {} as Record<string, number>);
 
@@ -98,29 +106,26 @@ const CombinedInventoryTable = ({
   const rowDataRef = useRef<RowData[]>([]);
   const rowsRef = useRef<RowData[]>([]);
 
-  // Combine product and inventory data
-  const rows: RowData[] = products.flatMap((product) =>
-    product.variants.map((variant) => {
-      const inventoryItem = inventory.find(
-        (item) => item.productId === product.id && item.variantId === variant.id
-      );
-      const variantKey = `${product.id}-${variant.id}`;
-      const itemsSold = salesByVariant[variantKey] || 0;
+  // Create rows from products directly (one row per product)
+  const rows: RowData[] = products.map((product) => {
+    const inventoryItem = inventory.find(
+      (item) => item.productId === product._id
+    );
+    const itemsSold = salesByProduct[product._id] || 0;
 
-      const rowData: RowData = {
-        id: `${product.id}-${variant.id}`,
-        productId: product.id,
-        variantId: variant.id,
-        productName: product.name,
-        variant: variant.color,
-        stock: inventoryItem?.quantityOnHand || 0,
-        itemsSold: itemsSold,
-        handleAdjust: handleAdjustClick,
-      };
+    const rowData: RowData = {
+      id: product._id,
+      productId: product._id,
+      productName: product.name,
+      category: product.category,
+      price: product.price,
+      stock: inventoryItem?.quantityOnHand || 0,
+      itemsSold: itemsSold,
+      handleAdjust: handleAdjustClick,
+    };
 
-      return rowData;
-    })
-  );
+    return rowData;
+  });
 
   // Store the rows for cell editing
   rowDataRef.current = rows;
@@ -130,14 +135,12 @@ const CombinedInventoryTable = ({
   const adjustMutation = useMutation({
     mutationFn: ({
       productId,
-      variantId,
       adjustment,
     }: {
       productId: string;
-      variantId: string;
       adjustment: number;
     }) =>
-      InventoryService.adjustInventory({ productId, variantId, adjustment }),
+      InventoryService.adjustInventory({ productId, adjustment }),
     onSuccess: () => {
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
@@ -159,7 +162,6 @@ const CombinedInventoryTable = ({
 
     if (newRow.variant !== oldRow.variant) {
       ProductService.updateVariant(newRow.productId, {
-        id: newRow.variantId,
         name: newRow.variant,
       });
     }
@@ -170,12 +172,11 @@ const CombinedInventoryTable = ({
 
       // If adjustment is negative (items were sold), create a sale record
       if (adjustment < 0) {
-        const product = products.find((p) => p.id === newRow.productId);
+        const product = products.find((p) => p._id === newRow.productId);
         if (product) {
           const quantitySold = Math.abs(adjustment);
           const saleData = {
             productId: newRow.productId,
-            variantId: newRow.variantId,
             quantity: quantitySold,
             totalAmount: quantitySold * product.price,
             channel: "manual", // Default channel for manual adjustments
@@ -193,7 +194,6 @@ const CombinedInventoryTable = ({
       // Adjust inventory
       adjustMutation.mutate({
         productId: newRow.productId,
-        variantId: newRow.variantId,
         adjustment,
       });
     }
@@ -205,8 +205,22 @@ const CombinedInventoryTable = ({
     setSelectedRow(null);
   };
 
+  const handleProductDialogClose = () => {
+    setProductDialogOpen(false);
+  };
+
   return (
     <>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setProductDialogOpen(true)}
+        >
+          Add Product
+        </Button>
+      </Box>
+
       <div style={{ height: 600, width: "100%" }}>
         <DataGrid
           rows={rows}
@@ -221,14 +235,17 @@ const CombinedInventoryTable = ({
           open={dialogOpen}
           onClose={handleDialogClose}
           productId={selectedRow.productId}
-          variantId={selectedRow.variantId}
           productName={selectedRow.productName}
-          variantName={selectedRow.variant}
           currentStock={selectedRow.stock}
           sales={sales}
           products={products}
         />
       )}
+
+      <ProductCreationDialog
+        open={productDialogOpen}
+        onClose={handleProductDialogClose}
+      />
     </>
   );
 };

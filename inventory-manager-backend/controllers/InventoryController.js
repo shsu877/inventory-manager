@@ -10,12 +10,11 @@ exports.getInventory = async (req, res) => {
   }
 };
 
-// Get inventory record for a product variant
-exports.getInventoryByVariant = async (req, res) => {
+// Get inventory record for a product
+exports.getInventoryByProduct = async (req, res) => {
   try {
     const inventory = await Inventory.findOne({
       productId: req.params.productId,
-      variantId: req.params.variantId
     }).populate('productId');
     if (!inventory) {
       return res.status(404).json({ message: 'Inventory record not found' });
@@ -29,12 +28,12 @@ exports.getInventoryByVariant = async (req, res) => {
 // Create or update inventory record
 exports.upsertInventory = async (req, res) => {
   try {
-    const { productId, variantId, quantityOnHand } = req.body;
-    let inventory = await Inventory.findOne({ productId, variantId });
+    const { productId, quantityOnHand } = req.body;
+    let inventory = await Inventory.findOne({ productId });
     if (inventory) {
       inventory.quantityOnHand = quantityOnHand;
     } else {
-      inventory = new Inventory({ productId, variantId, quantityOnHand });
+      inventory = new Inventory({ productId, quantityOnHand });
     }
     const updatedInventory = await inventory.save();
     res.json(updatedInventory);
@@ -43,12 +42,12 @@ exports.upsertInventory = async (req, res) => {
   }
 };
 
-// Adjust inventory for a product variant
+// Adjust inventory for a product
 exports.adjustInventory = async (req, res) => {
   try {
-    const { productId, variantId, adjustment } = req.body;
+    const { productId, adjustment } = req.body;
 
-    const inventory = await Inventory.findOne({ productId, variantId });
+    const inventory = await Inventory.findOne({ productId });
     if (!inventory) {
       return res.status(404).json({ message: 'Inventory record not found' });
     }

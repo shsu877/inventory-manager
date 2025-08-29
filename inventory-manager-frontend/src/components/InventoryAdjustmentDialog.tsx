@@ -18,9 +18,7 @@ interface InventoryAdjustmentDialogProps {
   open: boolean;
   onClose: () => void;
   productId: string;
-  variantId: string;
   productName: string;
-  variantName: string;
   currentStock: number;
   sales: Sale[];
   products: Product[];
@@ -30,9 +28,7 @@ export default function InventoryAdjustmentDialog({
   open,
   onClose,
   productId,
-  variantId,
   productName,
-  variantName,
   currentStock,
   sales,
   products
@@ -44,11 +40,11 @@ export default function InventoryAdjustmentDialog({
 
   // Calculate current items sold
   const itemsSold = sales
-    .filter(sale => sale.productId === productId && sale.variantId === variantId)
+    .filter(sale => sale.productId === productId)
     .reduce((total, sale) => total + sale.quantity, 0);
 
   const mutation = useMutation({
-    mutationFn: (data: { productId: string; variantId: string; adjustment: number }) =>
+    mutationFn: (data: { productId: string; adjustment: number }) =>
       InventoryService.adjustInventory(data),
     onSuccess: async () => {
       // Invalidate queries to refresh data
@@ -76,12 +72,11 @@ export default function InventoryAdjustmentDialog({
 
     // If the adjustment is negative (items were sold), create a sale record first
     if (adjustment < 0) {
-      const product = products.find(p => p.id === productId);
+      const product = products.find(p => p._id === productId);
       if (product) {
         const quantitySold = Math.abs(adjustment);
         const saleData = {
           productId,
-          variantId,
           quantity: quantitySold,
           totalAmount: quantitySold * product.price,
           channel: 'manual', // Default channel for manual adjustments
@@ -100,7 +95,6 @@ export default function InventoryAdjustmentDialog({
     // Adjust inventory
     mutation.mutate({
       productId,
-      variantId,
       adjustment
     });
   };
@@ -118,7 +112,7 @@ export default function InventoryAdjustmentDialog({
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>
-        Adjust Inventory: {productName} ({variantName})
+        Adjust Inventory: {productName}
       </DialogTitle>
 
       <DialogContent>
