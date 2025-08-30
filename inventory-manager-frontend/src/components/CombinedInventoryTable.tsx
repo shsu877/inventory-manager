@@ -7,7 +7,7 @@ import {
   ProductService,
 } from "../services/api";
 import { InventoryItem, Product, Sale } from "../types";
-import { Button, Box, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { Button, Box, FormControl, InputLabel, Select, MenuItem, Typography } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
 import InventoryAdjustmentDialog from "./InventoryAdjustmentDialog";
 import ProductCreationDialog from "./ProductCreationDialog";
@@ -46,10 +46,11 @@ const columns: GridColDef[] = [
   },
   {
     field: "stock",
-    headerName: "Stock",
+    headerName: "Stock (Click to Edit)",
     type: "number",
-    width: 100,
+    width: 150,
     editable: true,
+    headerClassName: 'stock-header',
   },
   {
     field: "itemsSold",
@@ -255,6 +256,12 @@ const CombinedInventoryTable = ({
 
   return (
     <>
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          💡 <strong>Inventory Adjustment:</strong> Double-click any stock number to edit directly. Enter the new total stock level (not the adjustment amount).
+        </Typography>
+      </Box>
+
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
         <FormControl sx={{ minWidth: 200 }}>
           <InputLabel>Filter by Tag</InputLabel>
