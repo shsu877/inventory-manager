@@ -113,7 +113,14 @@ export default function InventoryAdjustmentDialog({
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>
-        Adjust Inventory: {productName}
+        <Box>
+          <Typography variant="h6" component="div">
+            Adjust Inventory: {productName}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            💡 <strong>Type directly:</strong> Negative numbers reduce stock (creates sales), positive numbers add stock
+          </Typography>
+        </Box>
       </DialogTitle>
 
       <DialogContent>
@@ -134,15 +141,29 @@ export default function InventoryAdjustmentDialog({
         <TextField
           fullWidth
           type="number"
-          label="Adjustment Amount"
-          value={adjustment}
+          label="Adjustment Amount (Type the number directly)"
+          value={adjustment || ''}
           onChange={(e) => {
-            const value = Number(e.target.value);
-            setAdjustment(value);
+            const value = e.target.value;
+            // Allow numbers, negative sign, and decimal point
+            if (value === '' || /^-?\d*\.?\d*$/.test(value)) {
+              setAdjustment(value === '' ? 0 : Number(value));
+            }
           }}
+          onFocus={(e) => e.target.select()} // Select all text on focus
           sx={{ mb: 2 }}
-          helperText="Use positive numbers to add inventory, negative to reduce"
-          inputProps={{ step: 1 }}
+          helperText="Direct typing only: Negative numbers reduce stock (creates sales), positive numbers add stock"
+          inputProps={{
+            step: 'any',
+            inputMode: 'numeric', // Better mobile keyboard
+            pattern: '^-?[0-9]*(\.[0-9]*)?$', // Numeric pattern
+            autoComplete: 'off',
+            style: { textAlign: 'center' } // Center the text for better UX
+          }}
+          InputLabelProps={{
+            shrink: true
+          }}
+          placeholder="0"
         />
 
         <TextField
