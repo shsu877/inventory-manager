@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   InventoryService,
@@ -7,10 +7,11 @@ import {
   ProductService,
 } from "../services/api";
 import { InventoryItem, Product, Sale } from "../types";
-import { Button, Box, FormControl, InputLabel, Select, MenuItem, Typography } from "@mui/material";
-import { Add as AddIcon } from "@mui/icons-material";
+import { Button, Box, FormControl, InputLabel, Select, MenuItem, Typography, Checkbox } from "@mui/material";
+import { Add as AddIcon, ShoppingCart as ShoppingCartIcon } from "@mui/icons-material";
 import InventoryAdjustmentDialog from "./InventoryAdjustmentDialog";
 import ProductCreationDialog from "./ProductCreationDialog";
+import BulkSalesDialog from "./BulkSalesDialog";
 
 interface RowData {
   id: string;
@@ -98,7 +99,9 @@ const CombinedInventoryTable = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [bulkSalesOpen, setBulkSalesOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string>("");
+  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set() });
   const queryClient = useQueryClient();
 
   // Calculate items sold for each product by aggregating sales data
@@ -129,6 +132,20 @@ const CombinedInventoryTable = ({
     if (window.confirm('Are you sure you want to delete this product?')) {
       deleteMutation.mutate(productId);
     }
+  };
+
+  // Handle bulk sales
+  const handleBulkSalesClick = () => {
+    setBulkSalesOpen(true);
+  };
+
+  // Get selected products
+  const selectedProducts = filteredProducts.filter(product =>
+    selectionModel.ids.has(product._id)
+  );
+
+  const handleBulkSalesClose = () => {
+    setBulkSalesOpen(false);
   };
 
   // Store the original rows data for retrieving current stock values
@@ -281,20 +298,37 @@ const CombinedInventoryTable = ({
           </Select>
         </FormControl>
 
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setProductDialogOpen(true)}
-        >
-          Add Product
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={<ShoppingCartIcon />}
+            onClick={handleBulkSalesClick}
+            disabled={selectionModel.ids.size === 0}
+          >
+            Add Sales ({selectionModel.ids.size})
+          </Button>
+
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setProductDialogOpen(true)}
+          >
+            Add Product
+          </Button>
+        </Box>
       </Box>
 
       <div style={{ height: 600, width: "100%" }}>
         <DataGrid
           rows={rows}
           columns={columns}
-          disableRowSelectionOnClick
+          checkboxSelection
+          rowSelectionModel={selectionModel}
+          onRowSelectionModelChange={(newSelectionModel) => {
+            setSelectionModel(newSelectionModel);
+          }}
+          
           processRowUpdate={processRowUpdate}
         />
       </div>
@@ -314,6 +348,12 @@ const CombinedInventoryTable = ({
       <ProductCreationDialog
         open={productDialogOpen}
         onClose={handleProductDialogClose}
+      />
+
+      <BulkSalesDialog
+        open={bulkSalesOpen}
+        onClose={handleBulkSalesClose}
+        selectedProducts={selectedProducts}
       />
     </>
   );
