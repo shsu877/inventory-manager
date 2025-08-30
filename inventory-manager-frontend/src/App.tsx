@@ -61,11 +61,11 @@ function App() {
 
   return (
     <div style={{ padding: '20px' }}>
-      <h1>Inventory</h1>
+      <h1>Inventory Manager!</h1>
       
       <Paper sx={{ mb: 2 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} centered>
-          <Tab label="Inventory / Products" />
+        <Tabs className='inventory-tabs' value={activeTab} onChange={handleTabChange} centered>
+          <Tab label="Inventory" />
           <Tab label="Sales Report" />
         </Tabs>
       </Paper>

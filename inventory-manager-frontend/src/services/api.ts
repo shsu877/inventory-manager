@@ -61,6 +61,21 @@ export const ProductService = {
   }
 };
 
+// Etsy types
+interface EtsyAuth {
+  authUrl: string;
+  redirectUri: string;
+}
+
+interface EtsyImportResult {
+  imported: number;
+  errors: number;
+  data: {
+    importedSales: any[];
+    errors: any[];
+  };
+}
+
 export const SalesService = {
   getSales: async (): Promise<Sale[]> => {
     const response = await API.get('/sales');
@@ -75,6 +90,33 @@ export const SalesService = {
     channelOrderId?: string;
   }): Promise<Sale> => {
     const response = await API.post('/sales', sale);
+    return response.data;
+  }
+};
+
+export const EtsyService = {
+  startAuth: async (): Promise<EtsyAuth> => {
+    const response = await API.get('/etsy/auth');
+    return response.data;
+  },
+
+  getSales: async (startDate: string, endDate: string): Promise<any> => {
+    const response = await API.get(`/etsy/sales?startDate=${startDate}&endDate=${endDate}`);
+    return response.data;
+  },
+
+  getReceipts: async (shopId: string, startDate?: string, endDate?: string): Promise<any> => {
+    const params = new URLSearchParams();
+    params.append('shopId', shopId);
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+
+    const response = await API.get(`/etsy/receipts?${params.toString()}`);
+    return response.data;
+  },
+
+  importSales: async (etsyData: any[]): Promise<EtsyImportResult> => {
+    const response = await API.post('/etsy/import', { etsyData });
     return response.data;
   }
 };

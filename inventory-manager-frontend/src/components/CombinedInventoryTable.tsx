@@ -21,10 +21,11 @@ import {
   TextField,
   Popover
 } from "@mui/material";
-import { Add as AddIcon, ShoppingCart as ShoppingCartIcon } from "@mui/icons-material";
+import { Add as AddIcon, ShoppingCart as ShoppingCartIcon, CloudDownload as CloudDownloadIcon } from "@mui/icons-material";
 import InventoryAdjustmentDialog from "./InventoryAdjustmentDialog";
 import ProductCreationDialog from "./ProductCreationDialog";
 import BulkSalesDialog from "./BulkSalesDialog";
+import EtsyImportDialog from "./EtsyImportDialog";
 
 interface RowData {
   id: string;
@@ -161,6 +162,7 @@ const CombinedInventoryTable = ({
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [bulkSalesOpen, setBulkSalesOpen] = useState(false);
+  const [etsyImportOpen, setEtsyImportOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string>("");
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set() });
   const queryClient = useQueryClient();
@@ -201,6 +203,11 @@ const CombinedInventoryTable = ({
   // Handle bulk sales
   const handleBulkSalesClick = () => {
     setBulkSalesOpen(true);
+  };
+
+  // Handle Etsy import
+  const handleEtsyImportClick = () => {
+    setEtsyImportOpen(true);
   };
 
   // Get selected products
@@ -432,6 +439,10 @@ const CombinedInventoryTable = ({
     setProductDialogOpen(false);
   };
 
+  const handleEtsyImportDialogClose = () => {
+    setEtsyImportOpen(false);
+  };
+
   return (
     <>
       <Box sx={{ mb: 2 }}>
@@ -477,8 +488,17 @@ const CombinedInventoryTable = ({
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setProductDialogOpen(true)}
+            sx={{ mr: 1 }}
           >
             Add Product
+          </Button>
+
+          <Button
+            variant="outlined"
+            startIcon={<CloudDownloadIcon />}
+            onClick={handleEtsyImportClick}
+          >
+            Import Etsy Sales
           </Button>
         </Box>
       </Box>
@@ -518,6 +538,11 @@ const CombinedInventoryTable = ({
         open={bulkSalesOpen}
         onClose={handleBulkSalesClose}
         selectedProducts={selectedProducts}
+      />
+
+      <EtsyImportDialog
+        open={etsyImportOpen}
+        onClose={handleEtsyImportDialogClose}
       />
     </>
   );
