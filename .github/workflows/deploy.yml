@@ -1,4 +1,4 @@
-name: Build and Push Docker Images
+name: Build and Deploy to AWS EC2
 
 on:
   push:
@@ -7,6 +7,15 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment Environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
 
 jobs:
   build-and-push:
@@ -41,3 +50,62 @@ jobs:
         docker tag $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$GITHUB_SHA $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:latest
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$GITHUB_SHA
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Get ECR Registry
+      id: ecr-registry
+      run: |
+        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin
+        ECR_REGISTRY=$(aws sts get-caller-identity --query 'Account' --output text).dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+        echo "ecr-registry=$ECR_REGISTRY" >> $GITHUB_OUTPUT
+
+    - name: Deploy to EC2
+      run: |
+        echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ./ec2_key.pem
+        chmod 600 ./ec2_key.pem
+        ECR_REGISTRY=${{ steps.ecr-registry.outputs.ecr-registry }}
+        ssh -o StrictHostKeyChecking=no -i ./ec2_key.pem ec2-user@35.182.196.96 << EOF
+        set -e
+        # Login to ECR
+        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+        # Pull latest images
+        docker pull $ECR_REGISTRY/inventory-manager-backend:latest
+        docker pull $ECR_REGISTRY/inventory-manager-frontend:latest
+
+        # Stop and remove old containers if they exist
+        docker-compose down || true
+
+        # Create docker-compose.yml
+        cat > docker-compose.yml <<EOL
+        version: '3.8'
+        services:
+          backend:
+            image: \$(ECR_REGISTRY)/inventory-manager-backend:latest
+            ports:
+              - "3000:3000"
+            environment:
+              - NODE_ENV=production
+              - MONGODB_URI=mongodb+srv://shsu877:ODjnrJZrQ7aO4xHL@sticker-inventory.hbksle7.mongodb.net/inventory-manager?retryWrites=true&w=majority
+            restart: unless-stopped
+
+          frontend:
+            image: \$(ECR_REGISTRY)/inventory-manager-frontend:latest
+            ports:
+              - "80:80"
+            restart: unless-stopped
+        EOL
+
+        # Run the application
+        docker-compose up -d
+
+        # Clean up old images
+        docker image prune -f
+        EOF
