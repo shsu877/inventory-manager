@@ -91,10 +91,13 @@ jobs:
     - name: Get ECR Registry
       id: ecr-registry
       run: |
-        # Login to ECR
-        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin
-        # Get ECR registry URL
+        # Get ECR registry URL first
         ECR_REGISTRY=$(aws sts get-caller-identity --query 'Account' --output text).dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+        echo "ECR Registry: $ECR_REGISTRY"
+
+        # Login to ECR with specific registry
+        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY
+
         echo "ecr-registry=$ECR_REGISTRY" >> $GITHUB_OUTPUT
 
     - name: Deploy to EC2
