@@ -36,8 +36,11 @@ jobs:
 
     - name: Create ECR repositories
       run: |
-        aws ecr create-repository --repository-name inventory-manager-backend --region ${{ secrets.AWS_REGION }} || echo "Repository already exists"
-        aws ecr create-repository --repository-name inventory-manager-frontend --region ${{ secrets.AWS_REGION }} || echo "Repository already exists"
+        echo "Creating ECR repositories..."
+        aws ecr create-repository --repository-name inventory-manager-backend --region ${{ secrets.AWS_REGION }} || echo "Backend repository already exists or creation failed"
+        aws ecr create-repository --repository-name inventory-manager-frontend --region ${{ secrets.AWS_REGION }} || echo "Frontend repository already exists or creation failed"
+        echo "Listing repositories to verify creation:"
+        aws ecr describe-repositories --region ${{ secrets.AWS_REGION }}
 
     - name: Login to Amazon ECR
       id: login-ecr
@@ -48,8 +51,12 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY_BACKEND: inventory-manager-backend
       run: |
+        echo "Using ECR registry: $ECR_REGISTRY"
+        echo "Building backend image..."
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$GITHUB_SHA ./inventory-manager-backend
+        echo "Tagging backend image..."
         docker tag $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$GITHUB_SHA $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:latest
+        echo "Pushing backend images..."
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$GITHUB_SHA
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:latest
 
@@ -58,8 +65,11 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY_FRONTEND: inventory-manager-frontend
       run: |
+        echo "Building frontend image..."
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$GITHUB_SHA ./inventory-manager-frontend
+        echo "Tagging frontend image..."
         docker tag $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$GITHUB_SHA $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:latest
+        echo "Pushing frontend images..."
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:$GITHUB_SHA
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:latest
 
