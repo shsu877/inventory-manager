@@ -2,7 +2,7 @@ import axios from 'axios';
 import { InventoryItem, Product, Sale } from '../types';
 
 const API = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${localStorage.getItem('token')}`
