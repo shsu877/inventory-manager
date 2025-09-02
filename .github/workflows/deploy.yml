@@ -34,6 +34,11 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
+    - name: Create ECR repositories
+      run: |
+        aws ecr create-repository --repository-name inventory-manager-backend --region ${{ secrets.AWS_REGION }} || echo "Repository already exists"
+        aws ecr create-repository --repository-name inventory-manager-frontend --region ${{ secrets.AWS_REGION }} || echo "Repository already exists"
+
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
