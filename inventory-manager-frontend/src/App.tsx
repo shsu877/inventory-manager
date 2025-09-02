@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useInventory, useProducts, useSales } from './hooks';
 import CombinedInventoryTable from './components/CombinedInventoryTable';
 import SalesReport from './components/SalesReport';
-import { CircularProgress, Alert, Box, Tabs, Tab, Paper } from '@mui/material';
+import { CircularProgress, Alert, Box, Tabs, Tab, Paper, Typography } from '@mui/material';
 import LoginButton from './components/LoginButton';
 
 function App() {
@@ -60,8 +60,14 @@ function App() {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Inventory Manager!</h1>
+    <Box sx={{
+      padding: { xs: '10px', sm: '20px' },
+      maxWidth: '100vw',
+      overflowX: 'auto'
+    }}>
+      <Typography variant="h4" component="h1" sx={{ mb: 2 }}>
+        Inventory Manager!
+      </Typography>
       
       <Paper sx={{ mb: 2 }}>
         <Tabs className='inventory-tabs' value={activeTab} onChange={handleTabChange} centered>
@@ -84,8 +90,8 @@ function App() {
         salesLoading ? <CircularProgress /> :
         <SalesReport />
       )}
-      
-    </div>
+
+    </Box>
   );
 }
 

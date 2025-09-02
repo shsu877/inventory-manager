@@ -11,3 +11,22 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  body {
+    font-size: 14px;
+  }
+
+  /* Ensure horizontal scrolling works for tables */
+  .MuiDataGrid-root {
+    overflow-x: auto;
+  }
+
+  /* Ensure buttons in table actions stack or resize */
+  .MuiDataGrid-cell .MuiBox-root {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

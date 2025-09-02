@@ -19,7 +19,12 @@ import {
   Chip,
   Autocomplete,
   TextField,
-  Popover
+  Popover,
+  Card,
+  CardContent,
+  Divider,
+  useMediaQuery,
+  useTheme
 } from "@mui/material";
 import { Add as AddIcon, ShoppingCart as ShoppingCartIcon, CloudDownload as CloudDownloadIcon } from "@mui/icons-material";
 import InventoryAdjustmentDialog from "./InventoryAdjustmentDialog";
@@ -167,6 +172,10 @@ const CombinedInventoryTable = ({
   const [selectedTag, setSelectedTag] = useState<string>("");
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set() });
   const queryClient = useQueryClient();
+
+  // Theme and responsive breakpoint
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Query for available tags
   const { data: availableTags = [] } = useQuery({
@@ -317,12 +326,18 @@ const CombinedInventoryTable = ({
       headerName: "Actions",
       width: 250,
       renderCell: ({ row }) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: 1,
+          alignItems: { xs: 'stretch', sm: 'flex-start' }
+        }}>
           <Button
             size="small"
             variant="outlined"
             color="error"
             onClick={() => handleDeleteClick(row.productId)}
+            fullWidth
           >
             Delete
           </Button>
@@ -330,6 +345,7 @@ const CombinedInventoryTable = ({
             size="small"
             variant="outlined"
             onClick={() => handleAdjustClick(row.id)}
+            fullWidth
           >
             Adjust
           </Button>
@@ -461,19 +477,131 @@ const CombinedInventoryTable = ({
     setEtsyImportOpen(false);
   };
 
+  // Mobile Product Card Component
+  const MobileProductCard = ({ row }: { row: RowData }) => (
+    <Card sx={{ mb: 2, mx: 1 }}>
+      <CardContent>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <Typography variant="h6" component="h3" sx={{ mb: 1 }}>
+              {row.productName}
+            </Typography>
+            <Chip
+              label={row.isDeprecated ? "Deprecated" : "Active"}
+              color={row.isDeprecated ? "error" : "success"}
+              size="small"
+            />
+          </Box>
+
+          {row.tagsArray.length > 0 && (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+              {row.tagsArray.map((tag: string) => (
+                <Chip key={tag} label={tag} variant="outlined" size="small" />
+              ))}
+            </Box>
+          )}
+
+          <Divider />
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <Box>
+              <Typography variant="body2" color="text.secondary">
+                Stock: <Typography component="span" variant="body1" color="primary">{row.stock}</Typography>
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Sold: <Typography component="span" variant="body1">{row.itemsSold}</Typography>
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Price: <Typography component="span" variant="body1">${row.price}</Typography>
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                color="error"
+                onClick={() => handleDeleteClick(row.productId)}
+              >
+                Delete
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={() => handleAdjustClick(row.id)}
+              >
+                Adjust
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </CardContent>
+    </Card>
+  );
+
+  // Conditional rendering based on screen size
+  const renderProductView = () => {
+    if (isMobile) {
+      return (
+        <Box sx={{ mt: 2 }}>
+          {rows.map((row, index) => (
+            <MobileProductCard key={row.id} row={row} />
+          ))}
+        </Box>
+      );
+    }
+
+    // Desktop DataGrid view
+    return (
+      <Box sx={{
+        height: { xs: '500px', sm: '600px', md: '700px' },
+        width: '100%',
+        overflow: 'auto'
+      }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          checkboxSelection
+          rowSelectionModel={selectionModel}
+          onRowSelectionModelChange={(newSelectionModel) => {
+            setSelectionModel(newSelectionModel);
+          }}
+          pageSizeOptions={[10, 25, 50, 100]}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 10,
+              },
+            },
+          }}
+          processRowUpdate={processRowUpdate}
+        />
+      </Box>
+    );
+  };
+
   return (
     <>
       <Box sx={{ mb: 2 }}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          💡 <strong>Inventory Adjustment:</strong> Double-click any stock number to edit directly. Enter the new total stock level (not the adjustment amount).
+          💡 <strong>Inventory Adjustment:</strong> {isMobile ? 'Edit stock directly from product cards below' : 'Double-click any stock number to edit directly. Enter the new total stock level (not the adjustment amount).'}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          💡 <strong>Tags:</strong> Click the tags display to edit with autocomplete. Choose from existing tags or create new ones.
+          💡 <strong>Tags:</strong> {isMobile ? 'Tags are displayed as chips on cards' : 'Click the tags display to edit with autocomplete. Choose from existing tags or create new ones.'}
         </Typography>
       </Box>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center' }}>
-        <FormControl sx={{ minWidth: 200 }}>
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        mb: 2,
+        alignItems: 'center',
+        flexDirection: { xs: 'column', sm: 'row' },
+        gap: { xs: 2, sm: 0 }
+      }}>
+        <FormControl sx={{
+          minWidth: { xs: '100%', sm: 200 },
+          flex: 1
+        }}>
           <InputLabel>Filter by Tag</InputLabel>
           <Select
             value={selectedTag}
@@ -491,13 +619,19 @@ const CombinedInventoryTable = ({
           </Select>
         </FormControl>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{
+          display: 'flex',
+          gap: 2,
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'stretch', sm: 'flex-start' }
+        }}>
           <Button
             variant="contained"
             color="success"
             startIcon={<ShoppingCartIcon />}
             onClick={handleBulkSalesClick}
             disabled={selectionModel.ids.size === 0}
+            fullWidth
           >
             Add Sales ({selectionModel.ids.size})
           </Button>
@@ -506,7 +640,7 @@ const CombinedInventoryTable = ({
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setProductDialogOpen(true)}
-            sx={{ mr: 1 }}
+            fullWidth
           >
             Add Product
           </Button>
@@ -515,33 +649,22 @@ const CombinedInventoryTable = ({
             variant="outlined"
             startIcon={<CloudDownloadIcon />}
             onClick={handleEtsyImportClick}
+            fullWidth
           >
             Import Etsy Sales
           </Button>
         </Box>
       </Box>
 
-      <div style={{ height: 600, width: "100%" }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          checkboxSelection
-          rowSelectionModel={selectionModel}
-          onRowSelectionModelChange={(newSelectionModel) => {
-            setSelectionModel(newSelectionModel);
-          }}
-          
-          processRowUpdate={processRowUpdate}
-        />
-      </div>
+      {renderProductView()}
 
       {selectedRow && (
         <InventoryAdjustmentDialog
           open={dialogOpen}
           onClose={handleDialogClose}
-          productId={selectedRow.productId}
-          productName={selectedRow.productName}
-          currentStock={selectedRow.stock}
+          productId={selectedRow!.productId}
+          productName={selectedRow!.productName}
+          currentStock={selectedRow!.stock}
           sales={sales}
           products={products}
         />
