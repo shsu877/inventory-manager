@@ -26,7 +26,7 @@ import {
   useMediaQuery,
   useTheme
 } from "@mui/material";
-import { Add as AddIcon, ShoppingCart as ShoppingCartIcon, CloudDownload as CloudDownloadIcon } from "@mui/icons-material";
+import { Add as AddIcon, ShoppingCart as ShoppingCartIcon, CloudDownload as CloudDownloadIcon, Search as SearchIcon } from "@mui/icons-material";
 import InventoryAdjustmentDialog from "./InventoryAdjustmentDialog";
 import ProductCreationDialog from "./ProductCreationDialog";
 import BulkSalesDialog from "./BulkSalesDialog";
@@ -170,6 +170,7 @@ const CombinedInventoryTable = ({
   const [bulkSalesOpen, setBulkSalesOpen] = useState(false);
   const [etsyImportOpen, setEtsyImportOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set() });
   const queryClient = useQueryClient();
 
@@ -189,10 +190,17 @@ const CombinedInventoryTable = ({
     return acc;
   }, {} as Record<string, number>);
 
-  // Filter products based on selected tag
-  const filteredProducts = selectedTag
-    ? products.filter(product => product.tags?.includes(selectedTag))
-    : products;
+  // Filter products based on selected tag and search query
+  const filteredProducts = products.filter(product => {
+    // Check tag filter
+    const tagMatch = !selectedTag || product.tags?.includes(selectedTag);
+
+    // Check search query (case-insensitive)
+    const searchMatch = !searchQuery ||
+      product.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return tagMatch && searchMatch;
+  });
 
   // Handle button click for adjustments
   const handleAdjustClick = (rowId: string) => {
@@ -598,26 +606,51 @@ const CombinedInventoryTable = ({
         flexDirection: { xs: 'column', sm: 'row' },
         gap: { xs: 2, sm: 0 }
       }}>
-        <FormControl sx={{
-          minWidth: { xs: '100%', sm: 200 },
-          flex: 1
+        <Box sx={{
+          display: 'flex',
+          gap: 2,
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'stretch', sm: 'flex-start' },
+          width: { xs: '100%', sm: 'auto' }
         }}>
-          <InputLabel>Filter by Tag</InputLabel>
-          <Select
-            value={selectedTag}
-            label="Filter by Tag"
-            onChange={(e) => setSelectedTag(e.target.value)}
-          >
-            <MenuItem value="">
-              <em>All Products</em>
-            </MenuItem>
-            {availableTags.map((tag) => (
-              <MenuItem key={tag} value={tag}>
-                {tag}
+          <FormControl sx={{
+            minWidth: { xs: '100%', sm: 200 },
+            flex: { xs: 1, sm: 1 }
+          }}>
+            <InputLabel>Filter by Tag</InputLabel>
+            <Select
+              value={selectedTag}
+              label="Filter by Tag"
+              onChange={(e) => setSelectedTag(e.target.value)}
+            >
+              <MenuItem value="">
+                <em>All Products</em>
               </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+              {availableTags.map((tag) => (
+                <MenuItem key={tag} value={tag}>
+                  {tag}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <TextField
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{
+              minWidth: { xs: '100%', sm: 250 },
+              flex: { xs: 1, sm: 1 }
+            }}
+            InputProps={{
+              startAdornment: (
+                <SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
+              ),
+            }}
+            variant="outlined"
+            size="small"
+          />
+        </Box>
 
         <Box sx={{
           display: 'flex',
