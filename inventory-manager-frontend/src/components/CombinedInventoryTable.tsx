@@ -36,6 +36,7 @@ interface RowData {
   itemsSold: number;
   price: number;
   productId: string;
+  isDeprecated: boolean;
   handleAdjust: (rowId: string) => void;
   handleDelete: (productId: string) => void;
 }
@@ -239,6 +240,7 @@ const CombinedInventoryTable = ({
       price: product.price,
       stock: inventoryItem?.quantityOnHand || 0,
       itemsSold: itemsSold,
+      isDeprecated: product.isDeprecated,
       handleAdjust: handleAdjustClick,
       handleDelete: handleDeleteClick,
     };
@@ -271,7 +273,7 @@ const CombinedInventoryTable = ({
     },
     {
       field: "tagsArray",
-      headerName: "Tags (Click to Edit)",
+      headerName: "Tags",
       width: 250,
       renderCell: (params) => (
         <TagsCell
@@ -291,7 +293,7 @@ const CombinedInventoryTable = ({
     },
     {
       field: "stock",
-      headerName: "Stock (Click to Edit)",
+      headerName: "Stock",
       type: "number",
       width: 150,
       editable: true,
@@ -302,6 +304,13 @@ const CombinedInventoryTable = ({
       headerName: "Items Sold",
       type: "number",
       width: 120,
+    },
+    {
+      field: "isDeprecated",
+      headerName: "Deprecated",
+      type: "boolean",
+      width: 120,
+      editable: true,
     },
     {
       field: "actions",
@@ -393,6 +402,15 @@ const CombinedInventoryTable = ({
 
       // Refresh tags query to update filter dropdown
       queryClient.invalidateQueries({ queryKey: ["tags"] });
+    }
+
+    if (newRow.isDeprecated !== oldRow.isDeprecated) {
+      ProductService.updateProduct(newRow.productId, {
+        isDeprecated: newRow.isDeprecated,
+      });
+
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     }
 
     if (newRow.stock !== oldRow.stock) {
