@@ -40,7 +40,7 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
       if (isLogin) {
         await authService.login(formData);
       } else {
-        await authService.register(formData);
+        // await authService.register(formData);
       }
       onLoginSuccess?.();
     } catch (err: any) {

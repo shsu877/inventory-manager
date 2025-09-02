@@ -100,29 +100,29 @@ class AuthService {
     }
   }
 
-  async register(registerData: RegisterData): Promise<AuthResponse> {
-    try {
-      const response = await axios.post(`${this.baseURL}/auth/register`, registerData);
+  // async register(registerData: RegisterData): Promise<AuthResponse> {
+  //   try {
+  //     const response = await axios.post(`${this.baseURL}/auth/register`, registerData);
 
-      if (response.data.token) {
-        const { token, user } = response.data;
+  //     if (response.data.token) {
+  //       const { token, user } = response.data;
 
-        this.token = token;
-        this.user = user;
-        this.isAuthenticated = true;
+  //       this.token = token;
+  //       this.user = user;
+  //       this.isAuthenticated = true;
 
-        // Store token
-        localStorage.setItem('token', token);
+  //       // Store token
+  //       localStorage.setItem('token', token);
 
-        // Set axios default header
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      }
+  //       // Set axios default header
+  //       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  //     }
 
-      return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Registration failed');
-    }
-  }
+  //     return response.data;
+  //   } catch (error: any) {
+  //     throw new Error(error.response?.data?.message || 'Registration failed');
+  //   }
+  // }
 
   logout(): void {
     this.token = null;

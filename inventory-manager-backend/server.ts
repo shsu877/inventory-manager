@@ -42,7 +42,7 @@ app.get('/', (req: express.Request, res: express.Response) => {
 });
 
 // Auth routes
-app.post('/api/auth/register', AuthController.register);
+// app.post('/api/auth/register', AuthController.register);
 app.post('/api/auth/login', AuthController.login);
 
 // Product routes
