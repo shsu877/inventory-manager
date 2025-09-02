@@ -1,13 +1,19 @@
 import axios from 'axios';
 import { InventoryItem, Product, Sale } from '../types';
+import authService from './auth';
 
 const API = axios.create({
   baseURL: '/api',
   headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${localStorage.getItem('token')}`
+    'Content-Type': 'application/json'
   }
 });
+
+// Set up authorization header if token exists
+const token = authService.getToken();
+if (token) {
+  API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+}
 
 export const InventoryService = {
   getInventory: async (): Promise<InventoryItem[]> => {

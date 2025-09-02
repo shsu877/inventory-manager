@@ -8,6 +8,7 @@ import * as SalesController from './controllers/SalesController';
 import * as InventoryController from './controllers/InventoryController';
 import * as EtsyController from './controllers/EtsyController';
 import passportConfig from './config/passport';
+import { authenticateToken } from './middleware/auth';
 import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -45,30 +46,30 @@ app.post('/api/auth/register', AuthController.register);
 app.post('/api/auth/login', AuthController.login);
 
 // Product routes
-app.get('/api/products', ProductController.getProducts);
-app.get('/api/products/:id', ProductController.getProductById);
-app.get('/api/tags', ProductController.getAllTags);
-app.post('/api/products', ProductController.createProduct);
-app.put('/api/products/:id', ProductController.updateProduct);
-app.delete('/api/products/:id', ProductController.deleteProduct);
+app.get('/api/products', authenticateToken, ProductController.getProducts);
+app.get('/api/products/:id', authenticateToken, ProductController.getProductById);
+app.get('/api/tags', authenticateToken, ProductController.getAllTags);
+app.post('/api/products', authenticateToken, ProductController.createProduct);
+app.put('/api/products/:id', authenticateToken, ProductController.updateProduct);
+app.delete('/api/products/:id', authenticateToken, ProductController.deleteProduct);
 
 // Inventory routes
-app.get('/api/inventory', InventoryController.getInventory);
-app.get('/api/inventory/:productId', InventoryController.getInventoryByProduct);
-app.post('/api/inventory', InventoryController.upsertInventory);
-app.put('/api/inventory', InventoryController.adjustInventory);
+app.get('/api/inventory', authenticateToken, InventoryController.getInventory);
+app.get('/api/inventory/:productId', authenticateToken, InventoryController.getInventoryByProduct);
+app.post('/api/inventory', authenticateToken, InventoryController.upsertInventory);
+app.put('/api/inventory', authenticateToken, InventoryController.adjustInventory);
 
 // Sales routes
-app.post('/api/sales', SalesController.createSale);
-app.get('/api/sales', SalesController.getSales);
+app.post('/api/sales', authenticateToken, SalesController.createSale);
+app.get('/api/sales', authenticateToken, SalesController.getSales);
 
 // Etsy integration routes
-app.get('/api/etsy/auth', EtsyController.startEtsyAuth);
+app.get('/api/etsy/auth', authenticateToken, EtsyController.startEtsyAuth);
 app.get('/auth/etsy/callback', EtsyController.handleEtsyCallback);
-app.get('/api/etsy/shop', EtsyController.getEtsyShopInfo);
-app.get('/api/etsy/receipts', EtsyController.getEtsyReceipts);
-app.get('/api/etsy/sales', EtsyController.getEtsySales);
-app.post('/api/etsy/import', EtsyController.importEtsySales);
+app.get('/api/etsy/shop', authenticateToken, EtsyController.getEtsyShopInfo);
+app.get('/api/etsy/receipts', authenticateToken, EtsyController.getEtsyReceipts);
+app.get('/api/etsy/sales', authenticateToken, EtsyController.getEtsySales);
+app.post('/api/etsy/import', authenticateToken, EtsyController.importEtsySales);
 
 // Start server
 app.listen(port, () => {
