@@ -1,0 +1,76 @@
+import express from 'express';
+import mongoose from 'mongoose';
+import passport from 'passport';
+import { Product, Inventory, Sale } from './models';
+import * as ProductController from './controllers/ProductController';
+import * as AuthController from './controllers/AuthController';
+import * as SalesController from './controllers/SalesController';
+import * as InventoryController from './controllers/InventoryController';
+import * as EtsyController from './controllers/EtsyController';
+import passportConfig from './config/passport';
+import cors from 'cors';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const app = express();
+const port: string | number = process.env.PORT!;
+
+// CORS
+const corsOrigin = process.env.CORS_ORIGIN!;
+app.use(cors({
+  origin: corsOrigin,
+  credentials: true
+}));
+
+// Connect to MongoDB Atlas
+const mongoUri = process.env.MONGODB_URI!;
+mongoose.connect(mongoUri)
+  .then(() => console.log('MongoDB connected'))
+  .catch((err: any) => console.log(err));
+
+// Passport config
+app.use(passport.initialize());
+passportConfig(passport);
+
+// Middleware
+app.use(express.json());
+
+// Routes
+app.get('/', (req: express.Request, res: express.Response) => {
+  res.send('Inventory Manager API is running!');
+});
+
+// Auth routes
+app.post('/api/auth/register', AuthController.register);
+app.post('/api/auth/login', AuthController.login);
+
+// Product routes
+app.get('/api/products', ProductController.getProducts);
+app.get('/api/products/:id', ProductController.getProductById);
+app.get('/api/tags', ProductController.getAllTags);
+app.post('/api/products', ProductController.createProduct);
+app.put('/api/products/:id', ProductController.updateProduct);
+app.delete('/api/products/:id', ProductController.deleteProduct);
+
+// Inventory routes
+app.get('/api/inventory', InventoryController.getInventory);
+app.get('/api/inventory/:productId', InventoryController.getInventoryByProduct);
+app.post('/api/inventory', InventoryController.upsertInventory);
+app.put('/api/inventory', InventoryController.adjustInventory);
+
+// Sales routes
+app.post('/api/sales', SalesController.createSale);
+app.get('/api/sales', SalesController.getSales);
+
+// Etsy integration routes
+app.get('/api/etsy/auth', EtsyController.startEtsyAuth);
+app.get('/auth/etsy/callback', EtsyController.handleEtsyCallback);
+app.get('/api/etsy/shop', EtsyController.getEtsyShopInfo);
+app.get('/api/etsy/receipts', EtsyController.getEtsyReceipts);
+app.get('/api/etsy/sales', EtsyController.getEtsySales);
+app.post('/api/etsy/import', EtsyController.importEtsySales);
+
+// Start server
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
