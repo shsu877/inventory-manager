@@ -30,6 +30,8 @@ jobs:
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
+      with:
+        region: ${{ secrets.AWS_REGION }}
 
     - name: Build and push backend image to ECR
       env:
@@ -62,7 +64,9 @@ jobs:
     - name: Get ECR Registry
       id: ecr-registry
       run: |
-        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin
+        # Login to ECR with region specified
+        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin --region ${{ secrets.AWS_REGION }}
+        # Get ECR registry URL
         ECR_REGISTRY=$(aws sts get-caller-identity --query 'Account' --output text).dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
         echo "ecr-registry=$ECR_REGISTRY" >> $GITHUB_OUTPUT
 
@@ -74,7 +78,7 @@ jobs:
         ssh -o StrictHostKeyChecking=no -i ./ec2_key.pem ec2-user@35.182.196.96 << EOF
         set -e
         # Login to ECR
-        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY
+        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY --region ${{ secrets.AWS_REGION }}
 
         # Pull latest images
         docker pull $ECR_REGISTRY/inventory-manager-backend:latest
