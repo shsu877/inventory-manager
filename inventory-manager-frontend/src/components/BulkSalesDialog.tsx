@@ -240,10 +240,9 @@ export default function BulkSalesDialog({
               sx={{ width: 150 }}
               size="small"
             >
-              <MenuItem value="retail">Retail</MenuItem>
+              <MenuItem value="retail">Tabling</MenuItem>
               <MenuItem value="online">Online</MenuItem>
-              <MenuItem value="wholesale">Wholesale</MenuItem>
-              <MenuItem value="bulk">Bulk Sale</MenuItem>
+              <MenuItem value="other">Other</MenuItem>
             </TextField>
           </Box>
         </Box>

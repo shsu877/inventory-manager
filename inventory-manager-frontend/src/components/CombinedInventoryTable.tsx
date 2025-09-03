@@ -256,8 +256,8 @@ const CombinedInventoryTable = ({
     setEditDialogOpen(true);
   };
 
-  // Get selected products
-  const selectedProducts = filteredProducts.filter((product) =>
+  // Get selected products (from all products, regardless of current filter/search)
+  const selectedProducts = products.filter((product) =>
     selectionModel.ids.has(product._id)
   );
 
@@ -643,6 +643,7 @@ const CombinedInventoryTable = ({
           rows={rows}
           columns={columns}
           checkboxSelection
+          keepNonExistentRowsSelected
           rowSelectionModel={selectionModel}
           onRowSelectionModelChange={(newSelectionModel) => {
             setSelectionModel(newSelectionModel);
