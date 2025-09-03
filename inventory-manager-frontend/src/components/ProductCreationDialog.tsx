@@ -16,7 +16,6 @@ import { ProductService, InventoryService } from '../services/api';
 
 interface ProductFormData {
   name: string;
-  description: string;
   tags: string[];
   price: number;
   startingStock: number;
@@ -33,7 +32,6 @@ const ProductCreationDialog: React.FC<ProductCreationDialogProps> = ({
 }) => {
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
-    description: '',
     tags: [],
     price: 0,
     startingStock: 0,
@@ -52,7 +50,6 @@ const ProductCreationDialog: React.FC<ProductCreationDialogProps> = ({
       // Create the product first
       const productData = {
         name: data.name,
-        description: data.description,
         tags: data.tags,
         price: data.price,
       };
@@ -84,7 +81,6 @@ const ProductCreationDialog: React.FC<ProductCreationDialogProps> = ({
   const handleClose = () => {
     setFormData({
       name: '',
-      description: '',
       tags: [],
       price: 0,
       startingStock: 0,
@@ -108,9 +104,6 @@ const ProductCreationDialog: React.FC<ProductCreationDialogProps> = ({
 
     if (!formData.name.trim()) {
       newErrors.name = 'Product name is required';
-    }
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
     }
     if (formData.price <= 0) {
       newErrors.price = 'Price must be greater than 0';
@@ -162,17 +155,6 @@ const ProductCreationDialog: React.FC<ProductCreationDialogProps> = ({
             fullWidth
           />
 
-          <TextField
-            label="Description"
-            value={formData.description}
-            onChange={(e) => handleFieldChange('description', e.target.value)}
-            error={!!errors.description}
-            helperText={errors.description}
-            required
-            multiline
-            rows={3}
-            fullWidth
-          />
 
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
             <Autocomplete

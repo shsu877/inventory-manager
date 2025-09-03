@@ -4,7 +4,6 @@ import { Product } from '../models';
 type ProductParams = { id: string };
 type ProductBody = {
   name: string;
-  description: string;
   category?: string;
   tags?: string[];
   price: number;

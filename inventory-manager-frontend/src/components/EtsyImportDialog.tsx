@@ -66,7 +66,6 @@ const EtsyImportDialog: React.FC<EtsyImportDialogProps> = ({ open, onClose }) =>
           totalAmount: 50.00,
           created_timestamp: new Date().getTime() / 1000,
           receipt_id: 'receipt_123',
-          description: 'Sample product description',
           tags: ['tag1', 'tag2']
         },
         {
@@ -76,7 +75,6 @@ const EtsyImportDialog: React.FC<EtsyImportDialogProps> = ({ open, onClose }) =>
           totalAmount: 35.00,
           created_timestamp: new Date().getTime() / 1000 - 86400, // Yesterday
           receipt_id: 'receipt_124',
-          description: 'Another sample product',
           tags: ['tag3']
         }
       ]);

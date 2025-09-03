@@ -4,7 +4,6 @@ import bcrypt from 'bcrypt';
 // Product interface
 export interface IProduct {
   name: string;
-  description: string;
   tags?: string[];
   price: number;
   isDeprecated: boolean;
@@ -39,7 +38,6 @@ export interface IUser extends Document {
 // Product Schema
 const productSchema = new Schema<IProduct>({
   name: { type: String, required: true },
-  description: { type: String, required: true },
   tags: [String],
   price: { type: Number, required: true },
   isDeprecated: { type: Boolean, default: false }
