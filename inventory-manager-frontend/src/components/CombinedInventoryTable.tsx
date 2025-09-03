@@ -190,8 +190,8 @@ const CombinedInventoryTable = ({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [bulkSalesOpen, setBulkSalesOpen] = useState(false);
   const [bulkPriceOpen, setBulkPriceOpen] = useState(false);
- const [etsyImportOpen, setEtsyImportOpen] = useState(false);
- const [csvImportOpen, setCsvImportOpen] = useState(false);
+  const [etsyImportOpen, setEtsyImportOpen] = useState(false);
+  const [csvImportOpen, setCsvImportOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>({
@@ -200,7 +200,10 @@ const CombinedInventoryTable = ({
   });
 
   // Store previous selection to detect select all toggles
-  const previousSelectionRef = useRef<GridRowSelectionModel>({ type: "include", ids: new Set() });
+  const previousSelectionRef = useRef<GridRowSelectionModel>({
+    type: "include",
+    ids: new Set(),
+  });
   const queryClient = useQueryClient();
 
   // Theme and responsive breakpoint
@@ -322,48 +325,34 @@ const CombinedInventoryTable = ({
 
   // Enhanced selection handler to better handle select all with filtering
   const handleSelectionChange = (newSelectionModel: GridRowSelectionModel) => {
-    console.log('Selection Change:', {
-      previous: previousSelectionRef.current,
-      new: newSelectionModel,
-      filteredCount: filteredProducts.length,
-      visibleIds: filteredProducts.map(p => p._id)
-    });
-
     const previousIds = previousSelectionRef.current?.ids || new Set();
     const currentIds = newSelectionModel.ids;
-    const visibleFilteredIds = new Set(filteredProducts.map(p => p._id));
+    const visibleFilteredIds = new Set(filteredProducts.map((p) => p._id));
 
     // Check if this looks like a select all/deselect all operation
-    const previouslySelectedVisible = Array.from(previousIds).filter(id => visibleFilteredIds.has(String(id)));
-    const currentlySelectedVisible = Array.from(currentIds).filter(id => visibleFilteredIds.has(String(id)));
-
-    const visibleCount = filteredProducts.length;
-    console.log('Selection Analysis:', {
-      previouslySelectedVisible: previouslySelectedVisible.length,
-      currentlySelectedVisible: currentlySelectedVisible.length,
-      visibleCount,
-      currentIds: Array.from(currentIds),
-      visibleFilteredIds: Array.from(visibleFilteredIds)
-    });
-
+    const currentlySelectedVisible = Array.from(currentIds).filter((id) =>
+      visibleFilteredIds.has(String(id))
+    );
     // If all visible items were selected and now all are deselected, or vice versa
-    if ((currentlySelectedVisible.length === 0)) {
-      console.log('this is a select all');
-
+    if (currentlySelectedVisible.length === 0) {
       if (newSelectionModel.type === "exclude") {
         // Select all in current filter: keep any existing selections outside current filter
-        const newSelection = { type: "include" as const, ids: new Set([...previousIds, ...visibleFilteredIds]) };
-        console.log('Setting select all:', newSelection);
+        const newSelection = {
+          type: "include" as const,
+          ids: new Set([...previousIds, ...visibleFilteredIds]),
+        };
         setSelectionModel(newSelection);
       } else {
         // Deselect all in current filter: remove only visible selections
-        const cleanedIds = new Set(Array.from(previousIds).filter(id => !visibleFilteredIds.has(String(id))));
+        const cleanedIds = new Set(
+          Array.from(previousIds).filter(
+            (id) => !visibleFilteredIds.has(String(id))
+          )
+        );
         const cleanedSelection = { type: "include" as const, ids: cleanedIds };
-        console.log('Setting deselect all:', cleanedSelection);
         setSelectionModel(cleanedSelection);
       }
     } else {
-      console.log('Normal selection change:', newSelectionModel);
       // Normal individual selection changes
       setSelectionModel(newSelectionModel);
     }
@@ -394,7 +383,14 @@ const CombinedInventoryTable = ({
       headerName: "Tags",
       width: 250,
       renderCell: (params) => (
-        <Box sx={{ display: "flex", alignItems: "center", width: "100%", height: "100%" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            width: "100%",
+            height: "100%",
+          }}
+        >
           <TagsCell
             value={params.value}
             onSave={(tags: string[]) =>
@@ -606,7 +602,13 @@ const CombinedInventoryTable = ({
   };
 
   // Mobile Product Card Component
-  const MobileProductCard = ({ row, product }: { row: RowData; product: Product }) => (
+  const MobileProductCard = ({
+    row,
+    product,
+  }: {
+    row: RowData;
+    product: Product;
+  }) => (
     <Card
       sx={{
         mb: 2,

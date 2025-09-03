@@ -48,9 +48,10 @@ app.post('/api/auth/login', AuthController.login);
 
 // Product routes
 app.get('/api/products', authenticateToken, ProductController.getProducts);
-app.get('/api/products/:id', authenticateToken, ProductController.getProductById);
 app.get('/api/tags', authenticateToken, ProductController.getAllTags);
+app.get('/api/products/:id', authenticateToken, ProductController.getProductById);
 app.post('/api/products', authenticateToken, ProductController.createProduct);
+app.put('/api/products/bulk-price', authenticateToken, ProductController.bulkUpdatePrice);
 app.put('/api/products/:id', authenticateToken, ProductController.updateProduct);
 app.delete('/api/products/:id', authenticateToken, ProductController.deleteProduct);
 

@@ -66,14 +66,10 @@ export const ProductService = {
     await API.delete(`/products/${productId}`);
   },
 
-  // Bulk update product prices (calls updateProduct for each item)
-  bulkUpdatePrices: async (updates: { productId: string; price: number }[]): Promise<any[]> => {
-    const results = [];
-    for (const update of updates) {
-      const result = await API.put(`/products/${update.productId}`, { price: update.price });
-      results.push(result.data);
-    }
-    return results;
+  // Bulk update product prices (single batch request)
+  bulkUpdatePrices: async (productIds: string[], price: number): Promise<any> => {
+    const result = await API.put('/products/bulk-price', { productIds, price });
+    return result.data;
   }
 };
 

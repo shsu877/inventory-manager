@@ -45,12 +45,8 @@ export default function BulkPriceDialog({
   // Bulk price update mutation
   const bulkPriceMutation = useMutation({
     mutationFn: async (priceData: { price: number }) => {
-      const updates = selectedProducts.map(product => ({
-        productId: product._id,
-        price: priceData.price
-      }));
-
-      return ProductService.bulkUpdatePrices(updates);
+      const productIds = selectedProducts.map(product => product._id);
+      return ProductService.bulkUpdatePrices(productIds, priceData.price);
     },
     onSuccess: (results) => {
       setSuccess(`Successfully updated price for ${results.length} products!`);
