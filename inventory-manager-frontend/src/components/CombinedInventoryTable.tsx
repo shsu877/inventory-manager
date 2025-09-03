@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { DataGrid, GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -32,10 +32,12 @@ import {
   CloudDownload as CloudDownloadIcon,
   CloudUpload as CloudUploadIcon,
   Search as SearchIcon,
+  AttachMoney as AttachMoneyIcon,
 } from "@mui/icons-material";
 import InventoryAdjustmentDialog from "./InventoryAdjustmentDialog";
 import ProductCreationDialog from "./ProductCreationDialog";
 import BulkSalesDialog from "./BulkSalesDialog";
+import BulkPriceDialog from "./BulkPriceDialog";
 import EtsyImportDialog from "./EtsyImportDialog";
 import CsvImportDialog from "./CsvImportDialog";
 import ProductEditDialog from "./ProductEditDialog";
@@ -185,8 +187,9 @@ const CombinedInventoryTable = ({
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
- const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
- const [bulkSalesOpen, setBulkSalesOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [bulkSalesOpen, setBulkSalesOpen] = useState(false);
+  const [bulkPriceOpen, setBulkPriceOpen] = useState(false);
  const [etsyImportOpen, setEtsyImportOpen] = useState(false);
  const [csvImportOpen, setCsvImportOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string>("");
@@ -195,6 +198,9 @@ const CombinedInventoryTable = ({
     type: "include",
     ids: new Set(),
   });
+
+  // Store previous selection to detect select all toggles
+  const previousSelectionRef = useRef<GridRowSelectionModel>({ type: "include", ids: new Set() });
   const queryClient = useQueryClient();
 
   // Theme and responsive breakpoint
@@ -248,6 +254,11 @@ const CombinedInventoryTable = ({
     setBulkSalesOpen(true);
   };
 
+  // Handle bulk price update
+  const handleBulkPriceClick = () => {
+    setBulkPriceOpen(true);
+  };
+
   // Handle Etsy import
   const handleEtsyImportClick = () => {
     setEtsyImportOpen(true);
@@ -271,6 +282,10 @@ const CombinedInventoryTable = ({
 
   const handleBulkSalesClose = () => {
     setBulkSalesOpen(false);
+  };
+
+  const handleBulkPriceClose = () => {
+    setBulkPriceOpen(false);
   };
 
   // Store the original rows data for retrieving current stock values
@@ -305,6 +320,56 @@ const CombinedInventoryTable = ({
   rowDataRef.current = rows;
   rowsRef.current = rows;
 
+  // Enhanced selection handler to better handle select all with filtering
+  const handleSelectionChange = (newSelectionModel: GridRowSelectionModel) => {
+    console.log('Selection Change:', {
+      previous: previousSelectionRef.current,
+      new: newSelectionModel,
+      filteredCount: filteredProducts.length,
+      visibleIds: filteredProducts.map(p => p._id)
+    });
+
+    const previousIds = previousSelectionRef.current?.ids || new Set();
+    const currentIds = newSelectionModel.ids;
+    const visibleFilteredIds = new Set(filteredProducts.map(p => p._id));
+
+    // Check if this looks like a select all/deselect all operation
+    const previouslySelectedVisible = Array.from(previousIds).filter(id => visibleFilteredIds.has(String(id)));
+    const currentlySelectedVisible = Array.from(currentIds).filter(id => visibleFilteredIds.has(String(id)));
+
+    const visibleCount = filteredProducts.length;
+    console.log('Selection Analysis:', {
+      previouslySelectedVisible: previouslySelectedVisible.length,
+      currentlySelectedVisible: currentlySelectedVisible.length,
+      visibleCount,
+      currentIds: Array.from(currentIds),
+      visibleFilteredIds: Array.from(visibleFilteredIds)
+    });
+
+    // If all visible items were selected and now all are deselected, or vice versa
+    if ((currentlySelectedVisible.length === 0)) {
+      console.log('this is a select all');
+
+      if (newSelectionModel.type === "exclude") {
+        // Select all in current filter: keep any existing selections outside current filter
+        const newSelection = { type: "include" as const, ids: new Set([...previousIds, ...visibleFilteredIds]) };
+        console.log('Setting select all:', newSelection);
+        setSelectionModel(newSelection);
+      } else {
+        // Deselect all in current filter: remove only visible selections
+        const cleanedIds = new Set(Array.from(previousIds).filter(id => !visibleFilteredIds.has(String(id))));
+        const cleanedSelection = { type: "include" as const, ids: cleanedIds };
+        console.log('Setting deselect all:', cleanedSelection);
+        setSelectionModel(cleanedSelection);
+      }
+    } else {
+      console.log('Normal selection change:', newSelectionModel);
+      // Normal individual selection changes
+      setSelectionModel(newSelectionModel);
+    }
+
+    previousSelectionRef.current = newSelectionModel;
+  };
   // Handler for tag updates
   const handleTagUpdate = async (productId: string, newTags: string[]) => {
     try {
@@ -657,9 +722,7 @@ const CombinedInventoryTable = ({
           checkboxSelection
           keepNonExistentRowsSelected
           rowSelectionModel={selectionModel}
-          onRowSelectionModelChange={(newSelectionModel) => {
-            setSelectionModel(newSelectionModel);
-          }}
+          onRowSelectionModelChange={handleSelectionChange}
           pageSizeOptions={[10, 25, 50, 100]}
           initialState={{
             pagination: {
@@ -688,6 +751,12 @@ const CombinedInventoryTable = ({
           {isMobile
             ? "Tags are displayed as chips on cards"
             : "Click the tags display to edit with autocomplete. Choose from existing tags or create new ones."}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          💡 <strong>Selection:</strong>{" "}
+          {isMobile
+            ? "Use individual checkboxes to select products"
+            : "Use checkboxes to select products. Header select all works with current filters."}
         </Typography>
       </Box>
 
@@ -760,6 +829,17 @@ const CombinedInventoryTable = ({
         >
           <Button
             variant="contained"
+            color="primary"
+            startIcon={<AttachMoneyIcon />}
+            onClick={handleBulkPriceClick}
+            disabled={selectionModel.ids.size === 0}
+            fullWidth
+          >
+            Set Price ({selectionModel.ids.size})
+          </Button>
+
+          <Button
+            variant="contained"
             color="success"
             startIcon={<ShoppingCartIcon />}
             onClick={handleBulkSalesClick}
@@ -820,6 +900,12 @@ const CombinedInventoryTable = ({
       <BulkSalesDialog
         open={bulkSalesOpen}
         onClose={handleBulkSalesClose}
+        selectedProducts={selectedProducts}
+      />
+
+      <BulkPriceDialog
+        open={bulkPriceOpen}
+        onClose={handleBulkPriceClose}
         selectedProducts={selectedProducts}
       />
 
