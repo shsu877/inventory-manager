@@ -24,9 +24,14 @@ import {
   CardContent,
   Divider,
   useMediaQuery,
-  useTheme
+  useTheme,
 } from "@mui/material";
-import { Add as AddIcon, ShoppingCart as ShoppingCartIcon, CloudDownload as CloudDownloadIcon, Search as SearchIcon } from "@mui/icons-material";
+import {
+  Add as AddIcon,
+  ShoppingCart as ShoppingCartIcon,
+  CloudDownload as CloudDownloadIcon,
+  Search as SearchIcon,
+} from "@mui/icons-material";
 import InventoryAdjustmentDialog from "./InventoryAdjustmentDialog";
 import ProductCreationDialog from "./ProductCreationDialog";
 import BulkSalesDialog from "./BulkSalesDialog";
@@ -51,9 +56,9 @@ let processRowUpdateFunction: any;
 
 // Custom Tags Cell Component
 const TagsCell: React.FC<{
-  value: string[],
-  onSave: (tags: string[]) => void,
-  availableTags: string[]
+  value: string[];
+  onSave: (tags: string[]) => void;
+  availableTags: string[];
 }> = ({ value, onSave, availableTags }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState<string[]>(value || []);
@@ -78,7 +83,13 @@ const TagsCell: React.FC<{
   return (
     <>
       <Box
-        sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, cursor: 'pointer', minHeight: 24 }}
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 0.5,
+          cursor: "pointer",
+          minHeight: 24,
+        }}
         onClick={handleClick}
       >
         {value && value.length > 0 ? (
@@ -86,7 +97,11 @@ const TagsCell: React.FC<{
             <Chip key={tag} label={tag} size="small" variant="outlined" />
           ))
         ) : (
-          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ fontStyle: "italic" }}
+          >
             No tags (click to edit)
           </Typography>
         )}
@@ -97,12 +112,12 @@ const TagsCell: React.FC<{
         anchorEl={anchorEl}
         onClose={handleClose}
         anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
+          vertical: "top",
+          horizontal: "left",
         }}
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
+          vertical: "top",
+          horizontal: "left",
         }}
       >
         <Box sx={{ p: 2, width: 300 }}>
@@ -138,7 +153,7 @@ const TagsCell: React.FC<{
             )}
             sx={{ mb: 2 }}
           />
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
             <Button size="small" onClick={handleClose}>
               Cancel
             </Button>
@@ -151,7 +166,6 @@ const TagsCell: React.FC<{
     </>
   );
 };
-
 
 interface CombinedInventoryTableProps {
   inventory: InventoryItem[];
@@ -171,32 +185,37 @@ const CombinedInventoryTable = ({
   const [etsyImportOpen, setEtsyImportOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>({ type: 'include', ids: new Set() });
+  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>({
+    type: "include",
+    ids: new Set(),
+  });
   const queryClient = useQueryClient();
 
   // Theme and responsive breakpoint
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   // Query for available tags
   const { data: availableTags = [] } = useQuery({
-    queryKey: ['tags'],
+    queryKey: ["tags"],
     queryFn: ProductService.getTags,
   });
 
   // Calculate items sold for each product by aggregating sales data
   const salesByProduct = sales.reduce((acc, sale) => {
-    acc[sale.productId.toString()] = (acc[sale.productId.toString()] || 0) + sale.quantity;
+    acc[sale.productId.toString()] =
+      (acc[sale.productId.toString()] || 0) + sale.quantity;
     return acc;
   }, {} as Record<string, number>);
 
   // Filter products based on selected tag and search query
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = products.filter((product) => {
     // Check tag filter
     const tagMatch = !selectedTag || product.tags?.includes(selectedTag);
 
     // Check search query (case-insensitive)
-    const searchMatch = !searchQuery ||
+    const searchMatch =
+      !searchQuery ||
       product.name.toLowerCase().includes(searchQuery.toLowerCase());
 
     return tagMatch && searchMatch;
@@ -213,7 +232,7 @@ const CombinedInventoryTable = ({
 
   // Handle button click for deletion
   const handleDeleteClick = (productId: string) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
+    if (window.confirm("Are you sure you want to delete this product?")) {
       deleteMutation.mutate(productId);
     }
   };
@@ -229,7 +248,7 @@ const CombinedInventoryTable = ({
   };
 
   // Get selected products
-  const selectedProducts = filteredProducts.filter(product =>
+  const selectedProducts = filteredProducts.filter((product) =>
     selectionModel.ids.has(product._id)
   );
 
@@ -252,7 +271,7 @@ const CombinedInventoryTable = ({
       id: product._id,
       productId: product._id,
       productName: product.name,
-      tags: product.tags?.join(', ') || '',
+      tags: product.tags?.join(", ") || "",
       tagsArray: product.tags || [],
       price: product.price,
       stock: inventoryItem?.quantityOnHand || 0,
@@ -293,13 +312,17 @@ const CombinedInventoryTable = ({
       headerName: "Tags",
       width: 250,
       renderCell: (params) => (
-        <TagsCell
-          value={params.value}
-          onSave={(tags: string[]) => handleTagUpdate(String(params.id), tags)}
-          availableTags={availableTags}
-        />
+        <Box sx={{ display: "flex", alignItems: "center", width: "100%", height: "100%" }}>
+          <TagsCell
+            value={params.value}
+            onSave={(tags: string[]) =>
+              handleTagUpdate(String(params.id), tags)
+            }
+            availableTags={availableTags}
+          />
+        </Box>
       ),
-      headerClassName: 'tags-header',
+      headerClassName: "tags-header",
     },
     {
       field: "price",
@@ -314,7 +337,7 @@ const CombinedInventoryTable = ({
       type: "number",
       width: 150,
       editable: true,
-      headerClassName: 'stock-header',
+      headerClassName: "stock-header",
     },
     {
       field: "itemsSold",
@@ -334,12 +357,16 @@ const CombinedInventoryTable = ({
       headerName: "Actions",
       width: 250,
       renderCell: ({ row }) => (
-        <Box sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          gap: 1,
-          alignItems: { xs: 'stretch', sm: 'flex-start' }
-        }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 1,
+            alignItems: "center",
+            width: "100%",
+            height: "100%",
+          }}
+        >
           <Button
             size="small"
             variant="outlined"
@@ -370,8 +397,7 @@ const CombinedInventoryTable = ({
     }: {
       productId: string;
       adjustment: number;
-    }) =>
-      InventoryService.adjustInventory({ productId, adjustment }),
+    }) => InventoryService.adjustInventory({ productId, adjustment }),
     onSuccess: () => {
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
@@ -414,7 +440,10 @@ const CombinedInventoryTable = ({
     if (newRow.tags !== oldRow.tags) {
       // Parse tags from comma-separated string to array
       const tagsArray = newRow.tags
-        ? newRow.tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0)
+        ? newRow.tags
+            .split(",")
+            .map((tag: string) => tag.trim())
+            .filter((tag: string) => tag.length > 0)
         : [];
 
       ProductService.updateProduct(newRow.productId, {
@@ -489,8 +518,14 @@ const CombinedInventoryTable = ({
   const MobileProductCard = ({ row }: { row: RowData }) => (
     <Card sx={{ mb: 2, mx: 1 }}>
       <CardContent>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+            }}
+          >
             <Typography variant="h6" component="h3" sx={{ mb: 1 }}>
               {row.productName}
             </Typography>
@@ -502,7 +537,7 @@ const CombinedInventoryTable = ({
           </Box>
 
           {row.tagsArray.length > 0 && (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1 }}>
               {row.tagsArray.map((tag: string) => (
                 <Chip key={tag} label={tag} variant="outlined" size="small" />
               ))}
@@ -511,19 +546,34 @@ const CombinedInventoryTable = ({
 
           <Divider />
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-end",
+            }}
+          >
             <Box>
               <Typography variant="body2" color="text.secondary">
-                Stock: <Typography component="span" variant="body1" color="primary">{row.stock}</Typography>
+                Stock:{" "}
+                <Typography component="span" variant="body1" color="primary">
+                  {row.stock}
+                </Typography>
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Sold: <Typography component="span" variant="body1">{row.itemsSold}</Typography>
+                Sold:{" "}
+                <Typography component="span" variant="body1">
+                  {row.itemsSold}
+                </Typography>
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Price: <Typography component="span" variant="body1">${row.price}</Typography>
+                Price:{" "}
+                <Typography component="span" variant="body1">
+                  ${row.price}
+                </Typography>
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+            <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
               <Button
                 size="small"
                 variant="outlined"
@@ -560,11 +610,13 @@ const CombinedInventoryTable = ({
 
     // Desktop DataGrid view
     return (
-      <Box sx={{
-        height: { xs: '500px', sm: '600px', md: '700px' },
-        width: '100%',
-        overflow: 'auto'
-      }}>
+      <Box
+        sx={{
+          height: { xs: "500px", sm: "600px", md: "700px" },
+          width: "100%",
+          overflow: "auto",
+        }}
+      >
         <DataGrid
           rows={rows}
           columns={columns}
@@ -591,32 +643,44 @@ const CombinedInventoryTable = ({
     <>
       <Box sx={{ mb: 2 }}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          💡 <strong>Inventory Adjustment:</strong> {isMobile ? 'Edit stock directly from product cards below' : 'Double-click any stock number to edit directly. Enter the new total stock level (not the adjustment amount).'}
+          💡 <strong>Inventory Adjustment:</strong>{" "}
+          {isMobile
+            ? "Edit stock directly from product cards below"
+            : "Double-click any stock number to edit directly. Enter the new total stock level (not the adjustment amount)."}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          💡 <strong>Tags:</strong> {isMobile ? 'Tags are displayed as chips on cards' : 'Click the tags display to edit with autocomplete. Choose from existing tags or create new ones.'}
+          💡 <strong>Tags:</strong>{" "}
+          {isMobile
+            ? "Tags are displayed as chips on cards"
+            : "Click the tags display to edit with autocomplete. Choose from existing tags or create new ones."}
         </Typography>
       </Box>
 
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        mb: 2,
-        alignItems: 'stretch',
-        flexDirection: { xs: 'column', sm: 'row' },
-        gap: { xs: 2, sm: 0 }
-      }}>
-        <Box sx={{
-          display: 'flex',
-          gap: 2,
-          flexDirection: { xs: 'column', sm: 'row' },
-          alignItems: { xs: 'stretch', sm: 'flex-start' },
-          width: { xs: '100%', sm: 'auto' }
-        }}>
-          <FormControl sx={{
-            minWidth: { xs: '100%', sm: 200 },
-            flex: { xs: 1, sm: 1 }
-          }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          mb: 2,
+          alignItems: "stretch",
+          flexDirection: { xs: "column", sm: "row" },
+          gap: { xs: 2, sm: 0 },
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "stretch", sm: "flex-start" },
+            width: { xs: "100%", sm: "auto" },
+          }}
+        >
+          <FormControl
+            sx={{
+              minWidth: { xs: "100%", sm: 200 },
+              flex: { xs: 1, sm: 1 },
+            }}
+          >
             <InputLabel>Filter by Tag</InputLabel>
             <Select
               value={selectedTag}
@@ -639,24 +703,26 @@ const CombinedInventoryTable = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             sx={{
-              minWidth: { xs: '100%', sm: 250 },
-              flex: { xs: 1, sm: 1 }
+              minWidth: { xs: "100%", sm: 250 },
+              flex: { xs: 1, sm: 1 },
             }}
             InputProps={{
               startAdornment: (
-                <SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
+                <SearchIcon sx={{ color: "action.active", mr: 1, my: 0.5 }} />
               ),
             }}
             variant="outlined"
           />
         </Box>
 
-        <Box sx={{
-          display: 'flex',
-          gap: 2,
-          flexDirection: { xs: 'column', sm: 'row' },
-          alignItems: 'stretch'
-        }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: "stretch",
+          }}
+        >
           <Button
             variant="contained"
             color="success"
@@ -669,7 +735,7 @@ const CombinedInventoryTable = ({
           </Button>
 
           <Button
-            variant="contained" 
+            variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setProductDialogOpen(true)}
             fullWidth

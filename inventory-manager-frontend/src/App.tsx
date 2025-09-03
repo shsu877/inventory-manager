@@ -14,7 +14,6 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-import { useQueryClient } from "@tanstack/react-query";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -32,8 +31,6 @@ function App() {
   const { data: sales, isLoading: salesLoading } = useSales({
     enabled: isAuthenticated,
   });
-
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     // Check if user is already logged in

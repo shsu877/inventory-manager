@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { InventoryService, SalesService, ProductService } from '../services/api';
+import { InventoryService, SalesService } from '../services/api';
 import { Product } from '../types';
 import { Button, TextField, Box, FormControl, InputLabel, Select, MenuItem, Typography } from '@mui/material';
 
