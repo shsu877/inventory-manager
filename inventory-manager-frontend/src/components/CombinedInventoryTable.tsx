@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { DataGrid, GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRowSelectionModel, GridCellParams } from "@mui/x-data-grid";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   InventoryService,
@@ -359,6 +359,23 @@ const CombinedInventoryTable = ({
 
     previousSelectionRef.current = newSelectionModel;
   };
+
+  // Handle single-click cell editing
+  const handleCellClick = (params: GridCellParams, event: React.MouseEvent) => {
+    if (params.field === 'productName' || params.field === 'stock' || params.field === 'isDeprecated') {
+      // Prevent row selection when clicking on editable cells
+      event.stopPropagation();
+
+      // Start editing immediately for editable cells
+      if (params.colDef.editable) {
+        // Use setTimeout to ensure the click event is processed first
+        setTimeout(() => {
+          params.api.startCellEditMode({ id: params.id, field: params.field });
+        }, 50);
+      }
+    }
+  };
+
   // Handler for tag updates
   const handleTagUpdate = async (productId: string, newTags: string[]) => {
     try {
@@ -726,6 +743,7 @@ const CombinedInventoryTable = ({
           keepNonExistentRowsSelected
           rowSelectionModel={selectionModel}
           onRowSelectionModelChange={handleSelectionChange}
+          onCellClick={handleCellClick}
           pageSizeOptions={[10, 25, 50, 100]}
           initialState={{
             pagination: {
@@ -744,10 +762,10 @@ const CombinedInventoryTable = ({
     <>
       <Box sx={{ mb: 2 }}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          💡 <strong>Inventory Adjustment:</strong>{" "}
+          💡 <strong>Cell Editing:</strong>{" "}
           {isMobile
             ? "Edit stock directly from product cards below"
-            : "Double-click any stock number to edit directly. Enter the new total stock level (not the adjustment amount)."}
+            : "Click any editable cell (product name, stock, status) to edit immediately. Enter to save."}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
           💡 <strong>Tags:</strong>{" "}
