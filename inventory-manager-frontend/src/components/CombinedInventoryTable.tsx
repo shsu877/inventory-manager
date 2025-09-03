@@ -722,6 +722,7 @@ const CombinedInventoryTable = ({
           rows={rows}
           columns={columns}
           checkboxSelection
+          disableRowSelectionOnClick
           keepNonExistentRowsSelected
           rowSelectionModel={selectionModel}
           onRowSelectionModelChange={handleSelectionChange}
