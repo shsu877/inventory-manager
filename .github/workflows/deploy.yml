@@ -151,4 +151,3 @@ jobs:
         echo "Running cleanup in background..."
         (docker image prune -f || echo "Cleanup completed with warnings")
         echo "Deployment completed!"
-EOF
