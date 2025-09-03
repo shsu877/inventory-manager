@@ -138,9 +138,16 @@ jobs:
             restart: unless-stopped
         EOL
 
-        # Run the application
+        # Run the application in background and give it time to start
+        echo "Starting containers..."
         docker-compose up -d
+        echo "Waiting for containers to initialize..."
+        sleep 10
 
-        # Clean up old images
-        docker image prune -f
+        # Check container status and clean up concurrently
+        echo "Checking container status..."
+        docker-compose ps
+        echo "Running cleanup in background..."
+        (docker image prune -f || echo "Cleanup completed with warnings")
+        echo "Deployment completed!"
         EOF
