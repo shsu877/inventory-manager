@@ -1,49 +1,64 @@
 import { DataGrid, GridColDef, GridValueGetter } from "@mui/x-data-grid";
 import { useQuery } from "@tanstack/react-query";
-import { SalesService } from "../services/api";
-import { Sale } from "../types";
+import { SalesService, ProductService } from "../services/api";
+import { Sale, Product } from "../types";
 import { Box, Typography } from "@mui/material";
-
-const columns: GridColDef[] = [
-  {
-    field: "productId",
-    headerName: "Product",
-    flex: 1,
-    width: 200,
-    valueGetter: (params: any) => {
-      return "Product ID: " + params;
-    },
-  },
-  { field: "quantity", headerName: "Qty", type: "number", width: 80 },
-  {
-    field: "salePrice",
-    headerName: "Unit Price",
-    type: "number",
-    width: 100,
-    valueFormatter: (value) => `$${value}`,
-  },
-  {
-    field: "dateTime",
-    headerName: "Date",
-    width: 180,
-    valueFormatter: (what: any) => {
-      const date = new Date(what);
-      if (isNaN(date.getTime())) return "Invalid Date";
-      return (
-        date.toLocaleDateString() +
-        " " +
-        date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-      );
-    },
-  },
-  { field: "channel", headerName: "Channel", width: 100 },
-];
+import { useMemo } from "react";
 
 export default function SalesReport() {
-  const { data, isLoading, error } = useQuery({
+  const { data: sales, isLoading: salesLoading, error: salesError } = useQuery({
     queryKey: ["sales"],
     queryFn: () => SalesService.getSales(),
   });
+
+  const { data: products, isLoading: productsLoading, error: productsError } = useQuery({
+    queryKey: ["products"],
+    queryFn: () => ProductService.getProducts(),
+  });
+
+  const productMap = useMemo(() => {
+    const map = new Map<string, string>();
+    products?.forEach(product => map.set(product._id, product.name));
+    return map;
+  }, [products]);
+
+  const isLoading = salesLoading || productsLoading;
+  const error = salesError || productsError;
+
+  const columns: GridColDef[] = [
+    {
+      field: "productId",
+      headerName: "Product",
+      flex: 1,
+      width: 200,
+      valueGetter: (params) => {
+        return productMap.get(params) || "Unknown Product";
+      },
+    },
+    { field: "quantity", headerName: "Qty", type: "number", width: 80 },
+    {
+      field: "salePrice",
+      headerName: "Unit Price",
+      type: "number",
+      width: 100,
+      valueFormatter: (value) => `$${value}`,
+    },
+    {
+      field: "dateTime",
+      headerName: "Date",
+      width: 180,
+      valueFormatter: (what: any) => {
+        const date = new Date(what);
+        if (isNaN(date.getTime())) return "Invalid Date";
+        return (
+          date.toLocaleDateString() +
+          " " +
+          date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        );
+      },
+    },
+    { field: "channel", headerName: "Channel", width: 100 },
+  ];
 
   return (
     <Box sx={{ height: 600, width: "100%", p: 2 }}>
@@ -59,14 +74,14 @@ export default function SalesReport() {
       )}
 
       {/* Display data count for debugging */}
-      {data && !isLoading && (
+      {sales && !isLoading && (
         <Typography variant="caption" sx={{ mb: 1, display: "block" }}>
-          Loaded {Array.isArray(data) ? data.length : 0} sales records
+          Loaded {Array.isArray(sales) ? sales.length : 0} sales records
         </Typography>
       )}
 
       <DataGrid
-        rows={Array.isArray(data) ? data : []}
+        rows={Array.isArray(sales) ? sales : []}
         columns={columns}
         loading={isLoading}
         getRowId={(row) => row._id}
