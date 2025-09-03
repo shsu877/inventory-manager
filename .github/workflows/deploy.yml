@@ -131,7 +131,11 @@ jobs:
               - "3000:3000"
             environment:
               - NODE_ENV=production
+              - PORT=3000
               - MONGODB_URI=${{ secrets.MONGODB_URI }}
+              - JWT_SECRET=${{ secrets.JWT_SECRET }}
+              - CORS_ORIGIN=${{ vars.CORS_ORIGIN }}
+              - FRONTEND_URL=${{ secrets.FRONTEND_URL }}
             restart: unless-stopped
 
           frontend:

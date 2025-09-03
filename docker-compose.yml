@@ -1,8 +1,6 @@
 services:
   backend:
     build: ./inventory-manager-backend
-    env_file:
-      - ./inventory-manager-backend/.env
   frontend:
     build: ./inventory-manager-frontend
     ports:
