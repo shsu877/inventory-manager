@@ -44,11 +44,6 @@ export default function SalesReport() {
     queryKey: ["sales"],
     queryFn: () => SalesService.getSales(),
   });
-  // Debug logging (can be removed in production)
-  console.log("Sales data:", data);
-  console.log("Sales data type:", Array.isArray(data) ? "array" : typeof data);
-  console.log("Loading state:", isLoading);
-  console.log("Error state:", error);
 
   return (
     <Box sx={{ height: 600, width: "100%", p: 2 }}>

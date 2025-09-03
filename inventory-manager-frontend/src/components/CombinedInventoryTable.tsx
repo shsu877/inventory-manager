@@ -602,7 +602,7 @@ const CombinedInventoryTable = ({
         display: 'flex',
         justifyContent: 'space-between',
         mb: 2,
-        alignItems: 'center',
+        alignItems: 'stretch',
         flexDirection: { xs: 'column', sm: 'row' },
         gap: { xs: 2, sm: 0 }
       }}>
@@ -648,7 +648,6 @@ const CombinedInventoryTable = ({
               ),
             }}
             variant="outlined"
-            size="small"
           />
         </Box>
 
@@ -656,7 +655,7 @@ const CombinedInventoryTable = ({
           display: 'flex',
           gap: 2,
           flexDirection: { xs: 'column', sm: 'row' },
-          alignItems: { xs: 'stretch', sm: 'flex-start' }
+          alignItems: 'stretch'
         }}>
           <Button
             variant="contained"
@@ -670,7 +669,7 @@ const CombinedInventoryTable = ({
           </Button>
 
           <Button
-            variant="contained"
+            variant="contained" 
             startIcon={<AddIcon />}
             onClick={() => setProductDialogOpen(true)}
             fullWidth
