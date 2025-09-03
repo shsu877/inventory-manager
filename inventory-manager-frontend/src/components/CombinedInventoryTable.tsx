@@ -36,6 +36,7 @@ import InventoryAdjustmentDialog from "./InventoryAdjustmentDialog";
 import ProductCreationDialog from "./ProductCreationDialog";
 import BulkSalesDialog from "./BulkSalesDialog";
 import EtsyImportDialog from "./EtsyImportDialog";
+import ProductEditDialog from "./ProductEditDialog";
 
 interface RowData {
   id: string;
@@ -181,6 +182,8 @@ const CombinedInventoryTable = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [bulkSalesOpen, setBulkSalesOpen] = useState(false);
   const [etsyImportOpen, setEtsyImportOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string>("");
@@ -245,6 +248,12 @@ const CombinedInventoryTable = ({
   // Handle Etsy import
   const handleEtsyImportClick = () => {
     setEtsyImportOpen(true);
+  };
+
+  // Handle product edit
+  const handleEditClick = (product: Product) => {
+    setSelectedProduct(product);
+    setEditDialogOpen(true);
   };
 
   // Get selected products
@@ -514,10 +523,20 @@ const CombinedInventoryTable = ({
     setEtsyImportOpen(false);
   };
 
+  const handleEditDialogClose = () => {
+    setEditDialogOpen(false);
+    setSelectedProduct(null);
+  };
+
   // Mobile Product Card Component
-  const MobileProductCard = ({ row }: { row: RowData }) => (
-    <Card sx={{ mb: 2, mx: 1 }}>
-      <CardContent>
+  const MobileProductCard = ({ row, product }: { row: RowData; product: Product }) => (
+    <Card
+      sx={{
+        mb: 2,
+        mx: 1,
+      }}
+    >
+      <CardContent onClick={() => handleEditClick(product)}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <Box
             sx={{
@@ -601,9 +620,12 @@ const CombinedInventoryTable = ({
     if (isMobile) {
       return (
         <Box sx={{ mt: 2 }}>
-          {rows.map((row, index) => (
-            <MobileProductCard key={row.id} row={row} />
-          ))}
+          {rows.map((row, index) => {
+            const product = products.find((p) => p._id === row.productId);
+            return product ? (
+              <MobileProductCard key={row.id} row={row} product={product} />
+            ) : null;
+          })}
         </Box>
       );
     }
@@ -783,6 +805,14 @@ const CombinedInventoryTable = ({
         open={etsyImportOpen}
         onClose={handleEtsyImportDialogClose}
       />
+
+      {selectedProduct && (
+        <ProductEditDialog
+          open={editDialogOpen}
+          onClose={handleEditDialogClose}
+          product={selectedProduct}
+        />
+      )}
     </>
   );
 };
