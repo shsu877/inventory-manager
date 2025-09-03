@@ -30,12 +30,14 @@ import {
   Add as AddIcon,
   ShoppingCart as ShoppingCartIcon,
   CloudDownload as CloudDownloadIcon,
+  CloudUpload as CloudUploadIcon,
   Search as SearchIcon,
 } from "@mui/icons-material";
 import InventoryAdjustmentDialog from "./InventoryAdjustmentDialog";
 import ProductCreationDialog from "./ProductCreationDialog";
 import BulkSalesDialog from "./BulkSalesDialog";
 import EtsyImportDialog from "./EtsyImportDialog";
+import CsvImportDialog from "./CsvImportDialog";
 import ProductEditDialog from "./ProductEditDialog";
 
 interface RowData {
@@ -183,9 +185,10 @@ const CombinedInventoryTable = ({
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [bulkSalesOpen, setBulkSalesOpen] = useState(false);
-  const [etsyImportOpen, setEtsyImportOpen] = useState(false);
+ const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+ const [bulkSalesOpen, setBulkSalesOpen] = useState(false);
+ const [etsyImportOpen, setEtsyImportOpen] = useState(false);
+ const [csvImportOpen, setCsvImportOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>({
@@ -248,6 +251,11 @@ const CombinedInventoryTable = ({
   // Handle Etsy import
   const handleEtsyImportClick = () => {
     setEtsyImportOpen(true);
+  };
+
+  // Handle CSV import
+  const handleCsvImportClick = () => {
+    setCsvImportOpen(true);
   };
 
   // Handle product edit
@@ -523,6 +531,10 @@ const CombinedInventoryTable = ({
     setEtsyImportOpen(false);
   };
 
+  const handleCsvImportDialogClose = () => {
+    setCsvImportOpen(false);
+  };
+
   const handleEditDialogClose = () => {
     setEditDialogOpen(false);
     setSelectedProduct(null);
@@ -774,6 +786,15 @@ const CombinedInventoryTable = ({
           >
             Import Etsy Sales
           </Button>
+
+          <Button
+            variant="outlined"
+            startIcon={<CloudUploadIcon />}
+            onClick={handleCsvImportClick}
+            fullWidth
+          >
+            Import from CSV
+          </Button>
         </Box>
       </Box>
 
@@ -814,6 +835,11 @@ const CombinedInventoryTable = ({
           product={selectedProduct}
         />
       )}
+
+      <CsvImportDialog
+        open={csvImportOpen}
+        onClose={handleCsvImportDialogClose}
+      />
     </>
   );
 };

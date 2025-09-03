@@ -82,6 +82,12 @@ interface EtsyImportResult {
   };
 }
 
+interface CsvImportResult {
+  imported: number;
+  errors: number;
+  messages: string[];
+}
+
 export const SalesService = {
   getSales: async (): Promise<Sale[]> => {
     const response = await API.get('/sales');
@@ -123,6 +129,13 @@ export const EtsyService = {
 
   importSales: async (etsyData: any[]): Promise<EtsyImportResult> => {
     const response = await API.post('/etsy/import', { etsyData });
+    return response.data;
+  }
+};
+
+export const CsvService = {
+  importCsv: async (csvData: any[]): Promise<CsvImportResult> => {
+    const response = await API.post('/csv-import', { csvData });
     return response.data;
   }
 };

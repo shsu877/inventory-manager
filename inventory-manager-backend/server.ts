@@ -7,6 +7,7 @@ import * as AuthController from './controllers/AuthController';
 import * as SalesController from './controllers/SalesController';
 import * as InventoryController from './controllers/InventoryController';
 import * as EtsyController from './controllers/EtsyController';
+import * as CsvImportController from './controllers/CsvImportController';
 import passportConfig from './config/passport';
 import { authenticateToken } from './middleware/auth';
 import cors from 'cors';
@@ -70,6 +71,9 @@ app.get('/api/etsy/shop', authenticateToken, EtsyController.getEtsyShopInfo);
 app.get('/api/etsy/receipts', authenticateToken, EtsyController.getEtsyReceipts);
 app.get('/api/etsy/sales', authenticateToken, EtsyController.getEtsySales);
 app.post('/api/etsy/import', authenticateToken, EtsyController.importEtsySales);
+
+// CSV import routes
+app.post('/api/csv-import', authenticateToken, CsvImportController.importCsv);
 
 // Start server
 app.listen(port, () => {
