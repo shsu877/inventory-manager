@@ -76,7 +76,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build-and-push
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push'
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -131,7 +131,7 @@ jobs:
               - "3000:3000"
             environment:
               - NODE_ENV=production
-              - MONGODB_URI=mongodb+srv://shsu877:ODjnrJZrQ7aO4xHL@sticker-inventory.hbksle7.mongodb.net/inventory-manager?retryWrites=true&w=majority
+              - MONGODB_URI=${{ secrets.MONGODB_URI }}
             restart: unless-stopped
 
           frontend:
@@ -152,47 +152,3 @@ jobs:
         (docker image prune -f || echo "Cleanup completed with warnings")
         echo "Deployment completed!"
 EOF
-        set -e
-        # Login to ECR
-        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY
-
-        # Pull latest images
-        docker pull $ECR_REGISTRY/inventory-manager-backend:latest
-        docker pull $ECR_REGISTRY/inventory-manager-frontend:latest
-
-        # Stop and remove old containers if they exist
-        docker-compose down || true
-
-        # Create docker-compose.yml
-        cat > docker-compose.yml <<EOL
-        version: '3.8'
-        services:
-          backend:
-            image: \$(ECR_REGISTRY)/inventory-manager-backend:latest
-            ports:
-              - "3000:3000"
-            environment:
-              - NODE_ENV=production
-              - MONGODB_URI=mongodb+srv://shsu877:ODjnrJZrQ7aO4xHL@sticker-inventory.hbksle7.mongodb.net/inventory-manager?retryWrites=true&w=majority
-            restart: unless-stopped
-
-          frontend:
-            image: \$(ECR_REGISTRY)/inventory-manager-frontend:latest
-            ports:
-              - "80:80"
-            restart: unless-stopped
-        EOL
-
-        # Run the application in background and give it time to start
-        echo "Starting containers..."
-        docker-compose up -d
-        echo "Waiting for containers to initialize..."
-        sleep 10
-
-        # Check container status and clean up concurrently
-        echo "Checking container status..."
-        docker-compose ps
-        echo "Running cleanup in background..."
-        (docker image prune -f || echo "Cleanup completed with warnings")
-        echo "Deployment completed!"
-        EOF
