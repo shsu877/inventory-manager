@@ -91,6 +91,9 @@ export default function SalesReport() {
           pagination: {
             paginationModel: { pageSize: 25 },
           },
+          sorting: {
+            sortModel: [{ field: 'dateTime', sort: 'desc' }],
+          },
         }}
         pagination
         autoHeight={false}

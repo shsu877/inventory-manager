@@ -167,7 +167,7 @@ export default function BulkSalesDialog({
       fullWidth
     >
       <DialogTitle>
-        <Typography variant="h6">
+        <Typography>
           Bulk Sales Entry
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
@@ -200,7 +200,7 @@ export default function BulkSalesDialog({
                     {product.name}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Price: ${product.price} | Stock: {(product as any).currentStock || 'N/A'}
+                    Price: ${product.price}
                   </Typography>
                 </Box>
                 <TextField
@@ -240,7 +240,7 @@ export default function BulkSalesDialog({
               sx={{ width: 150 }}
               size="small"
             >
-              <MenuItem value="retail">Tabling</MenuItem>
+              <MenuItem value="tabling">Tabling</MenuItem>
               <MenuItem value="online">Online</MenuItem>
               <MenuItem value="other">Other</MenuItem>
             </TextField>
